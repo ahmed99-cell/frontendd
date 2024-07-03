@@ -11,7 +11,9 @@ import Select from 'react-select';
 import { faStar } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
+import Darkmode from 'darkmode-js';
+import { icon } from '@fortawesome/fontawesome-svg-core';
+import '../homeComponents/QuestionsPage.css';
 
 
 const QuestionStat = styled.div`
@@ -27,6 +29,9 @@ const QuestionStat = styled.div`
     margin-top: 4px;
   }
 `;
+
+
+
 
 const QuestionTitleArea = styled.div`
   padding: 0px 30px;
@@ -108,6 +113,16 @@ const FilterSelect = styled.select`
   box-sizing: border-box;
 `;
 
+const FavoriteIcon = styled.div`
+  &:hover {
+    color: gold;
+  }
+  &.gold {
+    color: gold;
+  }
+`;
+
+
 const QuestionsPage = () => {
   const [postPerPage] = useState(4);
   const [currentPage, setcurrentPage] = useState(1);
@@ -120,6 +135,7 @@ const QuestionsPage = () => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [mode, setMode] = useState('light'); // Default mode is light
   const [isFavorite, setIsFavorite] = useState(false);
+  
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -137,7 +153,9 @@ const QuestionsPage = () => {
   };
 
   const votreToken = localStorage.getItem('token');
-/**favotite work */
+
+  
+
 /*const handleFavoriteQuestion = async (questionId) => {
   try {
     
@@ -193,11 +211,29 @@ const QuestionsPage = () => {
   }
 };*/
 
-  
+useEffect(() => {
+  const options = {
+    bottom: '64px',
+    right: 'unset',
+    left: '32px',
+    time: '0.5s',
+    mixColor: '#fff',
+    backgroundColor: '#fff',
+    buttonColorDark: '#100f2c',
+    buttonColorLight: '#fff',
+    saveInCookies: true,
+    label: '🌓',
+    autoMatchOsTheme: true
+  };
+
+  const darkmode = new Darkmode(options);
+  darkmode.showWidget();
+}, []);
+
     
   const fetchQuestionData = async (questionId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/questions/${questionId}`);
+      const response = await fetch(`http://localhost:8082/api/questions/${questionId}`);
       const data = await response.json();
       // Update question data in the state
       setQuestionData((prevData) =>
@@ -207,6 +243,7 @@ const QuestionsPage = () => {
       console.error('Erreur lors de la récupération des données de la question:', error);
     }
   };
+
   const fetchAllQuestions = async () => {
     try {
       const response = await fetch('http://localhost:8082/api/questions/all', {
@@ -348,28 +385,59 @@ const QuestionsPage = () => {
   };
 
   const options = tags.map(tag => ({ value: tag.name, label: tag.name }));
-  const handleFavoriteQuestion = async (questionId) => {
+
+ const handleFavoriteQuestion = async (questionId) => {
     try {
-      const response = await axios.post(
-        `http://localhost:8082/api/favorites/markQuestionAsFavorite/${questionId}`,
-        {},
-        {
+      const question = questionDatas.find((question) => question.id === questionId);
+ 
+      if (!question) {
+        console.error('Question not found');
+        return;
+      }
+ 
+      const isQuestionFavorite = question.favorites && question.favorites.length > 0;
+ 
+      if (isQuestionFavorite) {
+        const favoriteId = question.favorites[0].id;
+        const response = await axios.delete(`http://localhost:8082/api/favorites/${favoriteId}`, {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
+        });
+        if (response.status === 200) {
+          Swal.fire('Question retiré des favoris', '', 'alert');
+ 
+          fetchQuestionData(questionId);
+        } else {
+          Swal.fire('Erreur dans la suppression', '', 'error');
         }
-      );
-  
-      if (response.status === 200) {
-        Swal.fire('Question ajoutée comme favoris', '', 'success');
-        setIsFavorite(response.data.isFavorite); // Update isFavorite based on response
       } else {
-        Swal.fire('Erreur dans l\'ajout', '', 'error');
+        const response = await axios.post(
+          `http://localhost:8082/api/favorites/markQuestionAsFavorite/${questionId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${votreToken}`,
+            },
+          },
+        );
+        if (response.status === 200) {
+          Swal.fire('Question ajoutée comme favoris', '', 'success');
+ 
+          fetchQuestionData(questionId);
+        } else {
+          Swal.fire("Erreur dans l'ajout", '', 'error');
+        }
       }
     } catch (error) {
-      console.error('Erreur lors de la requête pour marquer la question comme favorit :', error);
+      console.error(
+        'Erreur lors de la requête pour marquer/supprimer la question comme favori :',
+        error,
+      );
     }
   };
+ 
+  
   
   return (
     <>
@@ -472,7 +540,7 @@ const QuestionsPage = () => {
                     <QuestionLink to={`/client/question/${question.id}`}>
                       {question.title || 'No title'}
                     </QuestionLink>
-
+             
                     <div>
                       {question.tags &&
                         question.tags.map((tag, tagIndex) => (
@@ -483,7 +551,7 @@ const QuestionsPage = () => {
                     </div>
 
                     <WhoAndWhen>
-                      asked {formatDate(question.createdAt)} By{' '}
+                      asked  {formatDate(question.createdAt)} By{' '}
                       {question.username && question.username != null && (
                         <UserLink>
                           <span>{question.username}</span>
@@ -496,12 +564,14 @@ const QuestionsPage = () => {
                       )}
                     </WhoAndWhen>
                   </QuestionTitleArea>
-                  <div
-    className={`favorite-icon ${isFavorite ? 'gold' : ''}`}
-    onClick={() => handleFavoriteQuestion(question.id)}
->
-    <FontAwesomeIcon icon={faStar} />
-</div>
+                  <div 
+                    className={`favorite-icon ${
+                      question.favorites && question.favorites.length > 0 ? 'gold' : ''
+                    }`}
+                    onClick={() => handleFavoriteQuestion(question.id)}
+                  >
+                    <FontAwesomeIcon icon={faStar} />
+                  </div>
                 </StyledQuestionRow>
               ))}
 

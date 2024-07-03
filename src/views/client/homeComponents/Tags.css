@@ -7,3 +7,21 @@
     background-color: #cf022b;
     border-color: #cf022b;
   }
+  .tag-light {
+    color: hsl(205, 47%, 42%);
+    background-color: hsl(205, 46%, 92%);
+  }
+  
+  .description-light {
+    color: #000; /* Adjust as needed for description text color in light mode */
+  }
+  
+  /* Dark mode styles */
+  .tag-dark {
+    color: #fff; /* Adjust tag text color in dark mode */
+    background-color: #333; /* Adjust tag background color in dark mode */
+  }
+  
+  .description-dark {
+    color: #fff; /* Adjust description text color in dark mode */
+  }

@@ -113,10 +113,10 @@ function ProfilePage() {
     }
 
     if (
-      !formData.prenom.trim() ||
-      !formData.nom.trim() ||
-      !formData.email.trim() ||
-      !formData.username.trim()
+      !formData.prenom ||
+      !formData.nom ||
+      !formData.email ||
+      !formData.username
     ) {
       setErrorMessage('All fields are required');
       return;

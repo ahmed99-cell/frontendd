@@ -118,14 +118,16 @@ const [username, setUsername] = useState('');
           <ListItemIcon>
             <IconMail width={20} />
           </ListItemIcon>
-          <ListItemText>My Account</ListItemText>
-        </MenuItem>
+          <Link to="/client/Mesquestions" style={{ textDecoration: 'none', color: 'inherit' }}>
+      <ListItemText>My Questions</ListItemText>
+    </Link>        </MenuItem>
         <MenuItem>
           <ListItemIcon>
             <IconListCheck width={20} />
           </ListItemIcon>
-          <ListItemText>My Tasks</ListItemText>
-        </MenuItem>
+          <Link to="/client/Mesanswers" style={{ textDecoration: 'none', color: 'inherit' }}>
+      <ListItemText>My Answers</ListItemText>
+    </Link>        </MenuItem>
         <Box mt={1} py={1} px={2}>
           <Button to="/auth/login" variant="outlined" color="primary" component={Link} fullWidth  onClick={cleanLocalStorage}>
             Logout

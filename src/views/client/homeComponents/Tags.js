@@ -7,12 +7,14 @@ import '../homeComponents/Tags.css';
 import Swal from 'sweetalert2';
 import '../homeComponents/swal.css';
 import { FaTrash, FaEdit } from 'react-icons/fa'; // Importer les icônes de suppression et de modification
+import Darkmode from 'darkmode-js';
 
 export default function Tags() {
   const [tags, setTags] = useState([]);
+  const [expandedTagIds, setExpandedTagIds] = useState([]);
   const userRole = localStorage.getItem('role');
-
   const votreToken = localStorage.getItem('token');
+
   useEffect(() => {
     const fetchTags = async () => {
       try {
@@ -68,6 +70,25 @@ export default function Tags() {
     }
   };
 
+  useEffect(() => {
+    const options = {
+      bottom: '64px',
+      right: 'unset',
+      left: '32px',
+      time: '0.5s',
+      mixColor: '#fff',
+      backgroundColor: '#fff',
+      buttonColorDark: '#100f2c',
+      buttonColorLight: '#fff',
+      saveInCookies: false,
+      label: '🌓',
+      autoMatchOsTheme: true
+    };
+  
+    const darkmode = new Darkmode(options);
+    darkmode.showWidget();
+  }, []);
+  
   const handleDeleteTag = async (tagId) => {
     // Afficher une boîte de dialogue de confirmation avant la suppression
     const confirmation = await Swal.fire({
@@ -136,6 +157,14 @@ export default function Tags() {
     }
   };
 
+  const toggleDescription = (tagId) => {
+    setExpandedTagIds((prevExpandedTagIds) =>
+      prevExpandedTagIds.includes(tagId)
+        ? prevExpandedTagIds.filter((id) => id !== tagId)
+        : [...prevExpandedTagIds, tagId]
+    );
+  };
+
   return (
     <>
       <NewNavbar />
@@ -152,7 +181,7 @@ export default function Tags() {
                   <div className="main">
                     <h1 style={{ marginTop: '-20px' }}>Tags</h1>
                     <div className="mt-5">
-                      {userRole !== 'ROLE_USER' ||
+                    {userRole !== 'ROLE_USER' ||
                         (userRole !== 'ROLE_ADMIN' && (
                           <button
                             className="btn"
@@ -186,7 +215,16 @@ export default function Tags() {
                                 {tag.name}
                               </NavLink>
                               <p className="card-text m-2">
-                                {tag.description ? tag.description.slice(0, 100) : ''}...
+                                {expandedTagIds.includes(tag.id)
+                                  ? tag.description
+                                  : tag.description ? tag.description.slice(0, 100) : ''}...
+                                <button
+                                  onClick={() => toggleDescription(tag.id)}
+                                  className="btn btn-link"
+                                  style={{ padding: 0 }}
+                                >
+                                  {expandedTagIds.includes(tag.id) ? 'Less' : 'Learn More'}
+                                </button>
                               </p>
                               {userRole !== 'ROLE_USER' ||
                                 (userRole !== 'ROLE_ADMIN' && (

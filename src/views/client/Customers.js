@@ -1,19 +1,40 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import NewNavbar from './homeComponents/NewNavbar';
 import Sidebar from './homeComponents/sidebar';
 import '../client/Customers.css';
-
-import { NavLink } from 'react-router-dom';
-
-const searchSVG = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
-  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.414-1.414l-3.85-3.85a1.007 1.007 0 0 0-.114-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-</svg>
-`;
-
-const searchSVGDataURL = `data:image/svg+xml,${encodeURIComponent(searchSVG)}`;
+import UserCard from './homeComponents/UserCard';
+import axios from 'axios';
 
 const Customers = () => {
+  const Token = localStorage.getItem('token');
+  const [users, setUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get('http://localhost:8082/api/users', {
+        headers: {
+          Authorization: `Bearer ${Token}`,
+        },
+      });
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des utilisateurs :', error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredUsers = users.filter(user =>
+    user.username.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <>
       <NewNavbar />
@@ -26,8 +47,32 @@ const Customers = () => {
                 <div className="stack-index-content">
                   <div className="main">
                     <h1 style={{ marginTop: '-20px' }}>Users</h1>
-                    <div className="mt-5"></div>
-                    
+                    <div className="search-bar">
+                      <input
+                        type="text"
+                        placeholder="Search users..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        style={{
+                          width: '100%',
+                          padding: '10px',
+                          margin: '20px 0',
+                          border: '1px solid #ccc',
+                          borderRadius: '4px',
+                        }}
+                      />
+                    </div>
+                    <div className="mt-5 user-cards-container">
+                      {filteredUsers.map((user, index) => (
+                        <UserCard
+                          key={index}
+                          id={user.id}
+                          username={user.username}
+                          email={user.email}
+                          score={"100"}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>

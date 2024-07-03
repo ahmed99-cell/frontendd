@@ -1,48 +1,47 @@
 
-.filter-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start; /* Aligner les éléments au début */
-  color: black;
-}
-
-.filter-item {
-  display: flex;
-  flex-direction: column;
-  margin-right: 10px; /* Espacement entre les éléments */
-  flex: 1;
-}
-
-.filter-item span {
-  margin-bottom: 5px; /* Espacement entre l'étiquette et l'élément */
-  font-weight: bold; /* Rendre l'étiquette en gras pour plus de visibilité */
-}
-
-.filter-item input,
-.filter-item select {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-.filter-item select {
-  height: auto;
-}
-
-.filter-item select[multiple] {
-  height: auto;
-  background-color: #fff;
-  max-height: 200px; /* Limiter la hauteur de la liste déroulante multiple */
-  overflow-y: auto; /* Ajouter une barre de défilement si nécessaire */
-}
 
 
 
-/* Change la couleur de l'étoile en dorée au survol */
 .favorite-icon:hover {
   color: gold;
 }
 .favorite-icon.gold {
   color: gold;
+}
+
+body {
+  transition: color 0.5s, background-color 0.5s;
+}
+
+body.lightmode {
+  color: #000; /* Default text color for light mode */
+  background-color: #fff; /* Default background color for light mode */
+}
+
+body.lightmode .button {
+  color: #000; /* Button text color for light mode */
+  background-color: #fff; /* Button background color for light mode */
+}
+
+body.darkmode {
+  color: red; /* Text color for dark mode */
+  background-color: #000; /* Background color for dark mode */
+}
+
+body.darkmode p, body.darkmode li, body.darkmode h1, body.darkmode h2, body.darkmode h3, body.darkmode h4, body.darkmode h5, body.darkmode h6 {
+  color: red; /* Text color for dark mode */
+}
+
+body.darkmode .button {
+  color: white; /* Button text color for dark mode */
+  background-color: red; /* Button background color for dark mode */
+  border: 1px solid white; /* Optional: add a border for better visibility */
+}
+
+.darkmode--activated .logo {
+  mix-blend-mode: difference;
+}
+
+.darkmode-layer, .darkmode-toggle {
+  z-index: 500;
 }

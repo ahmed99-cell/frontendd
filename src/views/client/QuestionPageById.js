@@ -140,10 +140,23 @@ function QuestionsPageById() {
         },
       });
       setQuestion(response.data);
-      
+      console.log(response.data)
     } catch (error) {
       console.error('Error fetching question data:', error.message);
     }
+  };
+
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [fullScreenSrc, setFullScreenSrc] = useState('');
+ 
+  const handleImageClick = (src) => {
+    setFullScreenSrc(src);
+    setIsFullScreen(true);
+  };
+ 
+  const closeFullScreen = () => {
+    setIsFullScreen(false);
+    setFullScreenSrc('');
   };
 
 
@@ -313,6 +326,9 @@ function QuestionsPageById() {
                                 type="image/png"
                                 width="800px"
                                 height="400px"
+                                onClick={() =>
+                                  handleImageClick(`data:image/png;base64,${question.file}`)
+                                }
                               />
                             )}
                             {question.contentType === 'image/jpeg' && (
@@ -321,6 +337,9 @@ function QuestionsPageById() {
                                 type="image/jpeg"
                                 width="800px"
                                 height="400px"
+                                onClick={() =>
+                                  handleImageClick(`data:image/jpeg;base64,${question.file}`)
+                                }
                               />
                             )}
                             {question.contentType === 'text/csv' && (
@@ -331,6 +350,12 @@ function QuestionsPageById() {
                                 height="400px"
                               />
                             )}
+                          </div>
+                        
+                        )}
+                        {isFullScreen && (
+                          <div className="overlay" onClick={closeFullScreen}>
+                            <img src={fullScreenSrc} alt="Full screen" />
                           </div>
                         )}
 
@@ -357,7 +382,7 @@ function QuestionsPageById() {
       </span>
                           <span className="author">
                             <FontAwesomeIcon icon="user" style={{ marginRight: '5px' }} />{' '}
-                            {question.userAnonymous ? 'Anonyme' : 'Utilisateur'}
+                            {question.userAnonymous ? 'Anonyme' : question.username}
                           </span>
                           <span className="date">
                             <FontAwesomeIcon icon="calendar" style={{ marginRight: '5px' }} />
@@ -378,9 +403,9 @@ function QuestionsPageById() {
                       <div className="tags">
                         <p className="tag">Tags :</p>
                         <div className="tag-container">
-                          {question.tags.map((tag) => (
+                          {question.tags   && question.tags.map((tag) => (
                             <div key={tag.id} className="tag-item">
-                              {tag.name}
+                              {tag}
                               <a className="tagli"></a>
                             </div>
                           ))}
@@ -388,11 +413,11 @@ function QuestionsPageById() {
                       </div>
                       <div className="comments-list-wrap">
                         <h3 className="comment-count-title">
-                          {question.answers.length} response :
+                          {question.answers && question.answers.length} response :
                         </h3>
 
                         <div className="comment-list">
-                          {question.answers.map((answer) => (
+                          {question.answers && question.answers.map((answer) => (
                             <React.Fragment key={answer.id}>
                               <div
                                 className="single-comment-body"
@@ -406,7 +431,7 @@ function QuestionsPageById() {
                                       className="user-icon"
                                       style={{ fontFamily: 'monospace', marginLeft: '50px' }}
                                     />
-                                    <span style={{ marginLeft: '5px' }}>{answer.user}</span>
+                                    <span style={{ marginLeft: '5px' }}>{answer.username}</span>
                                     <span className="comment-date" style={{ marginLeft: '5px' }}>
                                       A répondu le {new Date(answer.createdAt).toLocaleDateString()}
                                     </span>{' '}
@@ -436,7 +461,7 @@ function QuestionsPageById() {
         />
 
         
-        <span className='mx-4'>{voteValue1}</span>
+<span className='mx-4'>{answer.votes.length}</span>
         
       
         <FontAwesomeIcon
@@ -474,7 +499,7 @@ function QuestionsPageById() {
                                         <h5>Replies:</h5>
                                         {answer.responses.map((response) => (
                                           <Comment key={response.id}>
-                                            <p>{response.content}</p>
+                                            <p>{response}</p>
                                           </Comment>
                                         ))}
                                       </div>

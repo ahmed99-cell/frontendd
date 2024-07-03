@@ -55,12 +55,16 @@ const UserLink = styled.a`
 `;
 
 const StyledQuestionRow = styled.div`
-  background-color: rgba(0, 0, 0, 0.01);
+ background-color: rgba(0, 0, 0, 0.01);
   padding: 15px 15px 10px;
   display: grid;
   grid-template-columns: repeat(3, 50px) 1fr;
-  border: 1px solid #dc3545;
+  border: 1px solid grey;
+  border-radius: 5px;
   margin-bottom: 20px;
+  padding: 10px;
+  margin-right:10px;
+  box-shadow: 1px 1px #888888;
 `;
 const QuestionOnTags = () => {
   const [questionDatas, setQuestionData] = useState([]);
@@ -106,24 +110,29 @@ const QuestionOnTags = () => {
 
     return `${day}/${month}/${year} ${hours}:${minutes}`;
   };
+
+  const sortedQuestions = questionDatas.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
   return (
     <div>
 <NewNavbar />
       <div style={{ display: 'flex' }}>
-        <Sidebar />
+        <Sidebar className='h-100' />
         <div style={{ flex: 1 }}>
           <Header2
           />{' '}
-        
-
-           { questionDatas.map((question, index) => (
+ <p className='ms-2'>
+        Total des questions de {tag.name}: {questionDatas.length} - {tag.description}
+      </p>
+           { sortedQuestions.map((question, index) => (
                 <StyledQuestionRow key={index}>
+                  
                   <QuestionStat>
-                    {typeof question.votes === 'number' ? question.votes : 0}
+                    {question.votes  ? question.votes.length : 0}
                     <span>votes</span>
                   </QuestionStat>
                   <QuestionStat>
-                    {typeof question.answers === 'number' ? question.answers : 0}
+                    {question.answers ? question.answers.length : 0}
                     <span>answers</span>
                   </QuestionStat>
                   <QuestionStat>
@@ -141,8 +150,7 @@ const QuestionOnTags = () => {
                         ))}
                     </div>
                     <WhoAndWhen>
-                      asked {formatDate(question.createdAt)} By{' '}
-                      {question.username || 'Anonymous'}
+                      asked {formatDate(question.createdAt)} 
                     </WhoAndWhen>
                   </QuestionTitleArea>
                 </StyledQuestionRow>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import './sidebar.css';
 import { BsEscape, BsTagFill,BsStar,BsPerson, BsTag, BsQuestionCircle } from 'react-icons/bs';
 import { BsQuestionCircleFill } from 'react-icons/bs'; // For "tag" and "question" icons
@@ -14,11 +14,35 @@ const SidebarOption = ({ title, children }) => {
   );
 };
 
+
+
+
+
 const Sidebar = () => {
+
+  const [sidebarHeight, setSidebarHeight] = useState('auto');
+
+useEffect(() => {
+  const checkPageHeight = () => {
+    const pageHeight = document.documentElement.scrollHeight; // Total height of the page
+    if (pageHeight < 800) {
+      setSidebarHeight('800px');
+    } else {
+      setSidebarHeight('110%');
+    }
+  };
+
+  checkPageHeight();
+  window.addEventListener('resize', checkPageHeight); // Recalculate on window resize
+
+  return () => {
+    window.removeEventListener('resize', checkPageHeight);
+  };
+}, []);
   return (
     <div className="">
-      <div className="" style={{ height: '110%' }}>
-        <div
+      <div style={{ height: sidebarHeight, minHeight: '100%', backgroundColor: '#f0f0f0', width: '250px' }}>
+      <div
           className=" d-flex flex-column flex-shrink-0 p-3 bg-light "
           style={{ width: '250px', height: '100%' ,boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)"}}
         >
@@ -52,7 +76,7 @@ const Sidebar = () => {
               </a>
             </li>
             <li>
-              <a href="#" className="nav-link link-dark">
+              <a href="/client/MesQuestionsFavorits" className="nav-link link-dark">
                 <BsStar className="me-2" style={{ fontSize: '1.5rem' }} /> 
                 <span style={{paddingTop:"6px"}}>Favoris</span>
               </a>

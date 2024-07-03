@@ -12,6 +12,10 @@ import AjouterModerateur from 'src/views/sample-page/AjouterModerateur';
 import UserProfile from 'src/views/client/UserProfile';
 import Customers from 'src/views/client/Customers';
 import QuestionOnTags from 'src/views/client/homeComponents/QuestionOnTags';
+import ChartComponent from 'src/views/client/homeComponents/Myquestions';
+import AnswersPage from 'src/views/client/homeComponents/Mesanswers';
+import MesQuestions from 'src/views/client/homeComponents/Mesquestions';
+import MesQuestionsFavorites from 'src/views/client/MesQuestionsFavorits';
 
 
 
@@ -81,6 +85,13 @@ const Router = [
       { path: '/client/tags', element: <Tags /> },
       {path : '/client/profile', element: <UserProfile />},
       { path:"/client/questionOntags/:tag", element:<QuestionOnTags /> },
+      {path : '/client/Myquestions', element: <ChartComponent/>},
+      {path : '/client/Mesquestions', element: <MesQuestions/>},
+      {path : '/client/Mesanswers', element: <AnswersPage/>},
+      {path : '/client/MesQuestionsFavorits', element: <MesQuestionsFavorites/>},
+      { path: '/client/user/:id', element: <ChartComponent /> }
+      
+
 
 
     ],

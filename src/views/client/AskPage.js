@@ -1,8 +1,8 @@
-import React, { useRef, useState, useEffect, setState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import NewNavbar from './homeComponents/NewNavbar';
 import './askpage.css';
 import axios from 'axios';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import Swal from 'sweetalert2';
 import Select from 'react-select';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -10,19 +10,19 @@ import { faUserSecret } from '@fortawesome/free-solid-svg-icons';
 
 const AskPage = () => {
   const navigate = useNavigate();
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const location = useLocation();
+  const question = location.state?.question;
+  const [title, setTitle] = useState(question ? question.title : '');
+  const [content, setContent] = useState(question ? question.content : '');
   const [file, setFile] = useState(null);
   const [tagId, setTagId] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [tags, setTags] = useState([]);
   const editor = useRef(null);
   const votreToken = localStorage.getItem('token');
-  const [isAnonymous, setIsAnonymous] = useState(false);
-
-  const config = {
-    // Vos configurations JoditEditor
-  };
+  const [isAnonymous, setIsAnonymous] = useState(question ? question.userAnonymous : false);
+  const [isEditMode, setIsEditMode] = useState(!!question);
+  const [existingImage, setExistingImage] = useState(null);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -37,7 +37,6 @@ const AskPage = () => {
         console.error('Error fetching tags:', error);
       }
     };
-
     fetchTags();
   }, []);
 
@@ -58,6 +57,13 @@ const AskPage = () => {
       }
     }
   }, []);
+  
+  useEffect(() => {
+    if (question) {
+      setExistingImage(question.image);
+      setSelectedTags(question.tags.map((tag) => ({ value: tag.id, label: tag.name })));
+    }
+  }, [question]);
 
   const handleSubmit = async (event) => {
     event.preventDefault(); // Prevent the form from submitting normally
@@ -80,33 +86,66 @@ const AskPage = () => {
     const formData = new FormData();
     formData.append('questionRequest.title', title);
     formData.append('questionRequest.content', content);
-    formData.append('file', file);
-    formData.append('tagIds', selectedTags.map(tag => tag.value));
-        formData.append('userAnonymous', isAnonymous);
-
-    // Send the data to the server with Axios
-    try {
-      const response = await axios.post('http://localhost:8082/api/questions/create', formData, {
-        headers: headers, // Pass the headers object to Axios
-      });
-
-      if (response.status === 200) {
-        await Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: 'Question created successfully!',
-        });
-
-        navigate('/client/questionpage'); // Redirect to home page or wherever you want
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      await Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'An error occurred while creating the question. Please try again later.',
-      });
+    if (file) {
+      formData.append('file', file);
     }
+    formData.append('tagIds', selectedTags.map(tag => tag.value));
+    formData.append('userAnonymous', isAnonymous);
+
+    if (isEditMode) {
+      // Update question
+      try {
+        const response = await axios.put(`http://localhost:8082/api/questions/${question.id}`, formData, { headers });
+
+        if (response.status === 200) {
+          await Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Question updated successfully!',
+          });
+
+          navigate('/client/questionpage'); // Redirect to home page or wherever you want
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'An error occurred while updating the question. Please try again later.',
+        });
+      }
+    } else {
+      // Create new question
+      try {
+        const response = await axios.post('http://localhost:8082/api/questions/create', formData, {
+          headers: headers, // Pass the headers object to Axios
+        });
+        if (response.status === 200) {
+          await Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Question created successfully!',
+          });
+
+          navigate('/client/questionpage'); // Redirect to home page or wherever you want
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'An error occurred while creating the question. Please try again later.',
+        });
+      }
+    }
+  };
+
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
+
+  const handleTagChange = (selectedOptions) => {
+    setSelectedTags(selectedOptions);
   };
 
   return (
@@ -117,7 +156,7 @@ const AskPage = () => {
           <div className="card mt-5" style={{ backgroundColor: 'hsl(206,100%,97%)' }}>
             <div className="card-header">
               <h3>
-                <b>Ask a Public Question</b>
+                <b>{isEditMode ? 'Update Question' : 'Ask a Public Question'}</b>
               </h3>
             </div>
             <div className="card-body">
@@ -160,9 +199,15 @@ const AskPage = () => {
 
                 <div className="form-group">
                   <label htmlFor="exampleInputEmail1">Add file</label>
+                  {existingImage && (
+                    <div>
+                      <img src={existingImage} alt="Existing image" style={{ maxWidth: '100%', maxHeight: '200px', marginBottom: '10px' }} />
+                    </div>
+                  )}
                   <input
+                  id ="exampleInputEmail1"
                     type="file"
-                    onChange={(e) => setFile(e.target.files[0])}
+                    onChange={handleFileChange}
                     className="form-control"
                   />
                 </div>
@@ -176,34 +221,35 @@ const AskPage = () => {
 
                   <Select
                     value={selectedTags}
-                    onChange={setSelectedTags}
+                    onChange={handleTagChange}
                     options={tags.map((tag) => ({ value: tag.id, label: tag.name }))}
                     isMulti={true}
                     placeholder="Select tags"
                   />
+
                   <small id="emailHelp" className="form-text text-muted">
                     Enter Question Tags
                   </small>
                 </div>
               </div>
             </div>
-            <div className="form-group form-check" style={{marginTop:"30px"}}>
-  <input
-    type="checkbox"
-    className="form-check-input"
-    id="anonymousCheckbox"
-    checked={isAnonymous}
-    style={{backgroundColor:"red",borderColor:"white"}}
-    onChange={(e) => setIsAnonymous(e.target.checked)}
-  />
-  <label className="form-check-label" htmlFor="anonymousCheckbox">
-  <FontAwesomeIcon icon={faUserSecret} style={{ marginRight: "5px" }} />
-    Rester anonyme
-  </label>
-</div>
+            <div className="form-group form-check" style={{ marginTop: '30px' }}>
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="anonymousCheckbox"
+                checked={isAnonymous}
+                style={{ backgroundColor: 'red', borderColor: 'white' }}
+                onChange={(e) => setIsAnonymous(e.target.checked)}
+              />
+              <label className="form-check-label" htmlFor="anonymousCheckbox">
+                <FontAwesomeIcon icon={faUserSecret} style={{ marginRight: '5px' }} />
+                Rester anonyme
+              </label>
+            </div>
 
             <button type="submit" className="btn btn-danger custom-btn mt-5 mb-5">
-              Ask Question
+              {isEditMode ? 'Update Question' : 'Ask Question'}
             </button>
           </form>
         </div>
