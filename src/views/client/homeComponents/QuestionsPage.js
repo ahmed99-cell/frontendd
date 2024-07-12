@@ -14,8 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Darkmode from 'darkmode-js';
 import { icon } from '@fortawesome/fontawesome-svg-core';
 import '../homeComponents/QuestionsPage.css';
-
-
+import { useTranslation } from 'react-i18next';
 const QuestionStat = styled.div`
   text-align: center;
   display: inline-block;
@@ -124,6 +123,7 @@ const FavoriteIcon = styled.div`
 
 
 const QuestionsPage = () => {
+  const { t } = useTranslation();
   const [postPerPage] = useState(4);
   const [currentPage, setcurrentPage] = useState(1);
   const [questionDatas, setQuestionData] = useState([]);
@@ -443,79 +443,77 @@ useEffect(() => {
     <>
       <NewNavbar />
       <div style={{ display: 'flex' }}>
-        <Sidebar />
+        <Sidebar className='h-100'/>
         <div style={{ flex: 1 }}>
           <Header2
             onDataUpdate={handleDataFromChild}
             onAllQuestionsClick={handleAllQuestionsClick}
           />
           <>
-          <div
+            <div
               className="filter-container"
               style={{
                 borderTop: 'solid 1px gray',
                 borderRight: 'solid 1px gray',
                 borderLeft: 'solid 1px gray',
-                borderBottom:'solid 1px gray',
-                marginBottom:"20px",
-                marginRight:"10px",
+                borderBottom: 'solid 1px gray',
+                marginBottom: "20px",
+                marginRight: "10px",
                 paddingBottom: '20px',
                 paddingTop: 10,
               }}
             >
-              
-            <FilterContainer className="mb-4">
-              <FilterItem style={{paddingLeft:"10px"}}>
-                <FilterItemLabel >Titre :</FilterItemLabel>
-                <FilterInput
-                  type="text"
-                  id="searchInput"
-                  placeholder="Rechercher par titre..."
-                  value={searchTitle}
-                  onChange={(e) => setSearchTitle(e.target.value)}
-                  style={{ height: '35px' }}
-                />
-              </FilterItem>
-              <FilterItem>
-                <FilterItemLabel>Utilisateurs :</FilterItemLabel>
-                <FilterSelect
-                  id="userSelect"
-                  value={selectedUser}
-                  onChange={(e) => setSelectedUser(e.target.value)}
-                >
-                  <option value="">Aucun</option>
-                  {users.map((user) => (
-                    <option key={user.matricul} value={user.matricul}>
-                      {user.username}
-                    </option>
-                  ))}
-                  <option value="Anonyme">Anonyme</option>
-                </FilterSelect>
-              </FilterItem>
-              <FilterItem>
-                <FilterItemLabel>Tags :</FilterItemLabel>
-                <Select
-                  id="tagsSelect"
-                  value={options.filter((option) => selectedTags.includes(option.value))}
-                  onChange={handleTagChange}
-                  options={options}
-                  isMulti
-                  placeholder="Select tags..."
-                  className="react-select-container"
-                  classNamePrefix="react-select"
-                />
-              </FilterItem>
-              <FilterItem>
-                <button
-                  onClick={handleSearch}
-                  className="btn btn-outline-danger"
-                  style={{ marginTop: '27px' }}
-                >
-                  Rechercher
-                </button>
-              
-              </FilterItem>
-            </FilterContainer>
+              <FilterContainer className="mb-4">
+                <FilterItem style={{ paddingLeft: "10px" }}>
+                  <FilterItemLabel>{t('Title')}:</FilterItemLabel>
+                  <FilterInput
+                    type="text"
+                    id="searchInput"
+                    placeholder={t("Search by title")}
+                    value={searchTitle}
+                    onChange={(e) => setSearchTitle(e.target.value)}
+                    style={{ height: '35px' }}
+                  />
+                </FilterItem>
+                <FilterItem>
+                  <FilterItemLabel>{t('Users')}:</FilterItemLabel>
+                  <FilterSelect
+                    id="userSelect"
+                    value={selectedUser}
+                    onChange={(e) => setSelectedUser(e.target.value)}
+                  >
+                    <option value="">{t('Select user')}</option>
+                    {users.map((user) => (
+                      <option key={user.matricul} value={user.matricul}>
+                        {user.username}
+                      </option>
+                    ))}
+                    <option value="Anonyme">{t('Anonymous')}</option>
+                  </FilterSelect>
+                </FilterItem>
+                <FilterItem>
+                  <FilterItemLabel>{t('Tags')}:</FilterItemLabel>
+                  <Select
+                    id="tagsSelect"
+                    value={options.filter((option) => selectedTags.includes(option.value))}
+                    onChange={handleTagChange}
+                    options={options}
+                    isMulti
+                    placeholder={t('Select tags...')}
+                    className="react-select-container"
+                    classNamePrefix="react-select"
+                  />
+                </FilterItem>
+                <FilterItem>
+                  <button
+                    onClick={handleSearch}
+                    className="btn btn-outline-danger"
+                    style={{ marginTop: '27px' }}
+                  >
+                    {t('Search')}
+                  </button>
+                </FilterItem>
+              </FilterContainer>
             </div>
             {error && <p>{error}</p>}
             {currentPosts &&
@@ -524,23 +522,23 @@ useEffect(() => {
                   <QuestionStat>
                     {(!question.answers && typeof question.voteCount === 'number') ? question.voteCount : !question.answers ? 0 : ''}
                     {question.votes && question.votes.length}
-                    <span>votes</span>
+                    <span>{t('votes')}</span>
                   </QuestionStat>
                   <QuestionStat>
                     {(!question.answers && typeof question.answerCount === 'number') ? question.answerCount : !question.answers ? 0 : ''}
                     {question.answers && question.answers.length}
-                    <span>answers</span>
+                    <span>{t('answers')}</span>
                   </QuestionStat>
                   <QuestionStat >
                     {typeof question.views === 'number' ? question.views : 0}
-                    <span>views</span>
+                    <span>{t('views')}</span>
                   </QuestionStat>
-
+  
                   <QuestionTitleArea style={{ paddingTop: '10px' }}>
                     <QuestionLink to={`/client/question/${question.id}`}>
-                      {question.title || 'No title'}
+                      {question.title || t('No title')}
                     </QuestionLink>
-             
+                    <div>{question.content}</div>
                     <div>
                       {question.tags &&
                         question.tags.map((tag, tagIndex) => (
@@ -549,9 +547,9 @@ useEffect(() => {
                           </Tag>
                         ))}
                     </div>
-
+  
                     <WhoAndWhen>
-                      asked  {formatDate(question.createdAt)} By{' '}
+                      {t('asked')} {formatDate(question.createdAt)} {t('By')}{' '}
                       {question.username && question.username != null && (
                         <UserLink>
                           <span>{question.username}</span>
@@ -559,7 +557,7 @@ useEffect(() => {
                       )}
                       {question.username === null && (
                         <UserLink>
-                          <span>Anonyme</span>
+                          <span>{t('Anonyme')}</span>
                         </UserLink>
                       )}
                     </WhoAndWhen>
@@ -574,7 +572,7 @@ useEffect(() => {
                   </div>
                 </StyledQuestionRow>
               ))}
-
+  
             <Pagination
               postsPerPage={postPerPage}
               totalPosts={questionDatas.length}
@@ -586,6 +584,7 @@ useEffect(() => {
       </div>
     </>
   );
-};
+  };
+  
 
 export default QuestionsPage;

@@ -106,7 +106,7 @@ console.log('erreur');
             htmlFor="password"
             mb="5px"
           >
-            Password
+            Password 
           </Typography>
           <CustomTextField
             id="password"

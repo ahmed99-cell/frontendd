@@ -95,6 +95,13 @@ const AnswersPage = () => {
             Authorization: `Bearer ${accessToken}`,
           },
         });
+        console.log('Fetched answers:', response); 
+        response.data.forEach(answer => {
+          console.log('Answer data:', answer);
+          if (!answer.questionId || !answer.id) {
+            console.error('Missing questionId or answerId in fetched data');
+          }
+        });
         setAnswers(response.data);
       } catch (error) {
         console.error('Error fetching answers:', error);
@@ -113,15 +120,15 @@ const AnswersPage = () => {
   };
 
   const handleEditClick = (questionId, answerId) => {
+    console.log('Attempting to edit:', { questionId, answerId });
     navigate(`/client/question/${questionId}`, {
-      state: { isEditMode: true },
+      state: { isEditMode: true, answerId },
     });
   };
 
-  const handleDeleteClick = async (questionId, answerId) => {
-    console.log(`Deleting answer with id: ${answerId} for question with id: ${questionId}`);
-    if (!questionId || !answerId) {
-      console.error('Invalid questionId or answerId');
+  const handleDeleteClick = async ( answerId) => {
+    if (!answerId) {
+      console.error('Invalid questionId or answerId for delete');
       return;
     }
 
@@ -136,12 +143,12 @@ const AnswersPage = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:8082/api/questions/${questionId}/answers/${answerId}`, {
+          await axios.delete(`http://localhost:8082/api/questions/answers/${answerId}`, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
           });
-          setAnswers(answers.filter((answer) => answer.id !== answerId));
+          setAnswers(answers.filter(answer => answer.id !== answerId));
           MySwal.fire({
             title: 'Deleted!',
             text: 'Your answer has been deleted.',
@@ -176,10 +183,6 @@ const AnswersPage = () => {
 
   const sortedAnswers = answers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-  if (!answers.length) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div>
       <NewNavbar />
@@ -212,11 +215,29 @@ const AnswersPage = () => {
             {sortedAnswers.map((answer, index) => (
               <StyledAnswerRow key={index} onClick={() => handleAnswerClick(answer.questionId)}>
                 <EditDeleteIcons>
-                  <FontAwesomeIcon icon={faEdit} onClick={(e) => { e.stopPropagation(); handleEditClick(answer.questionId, answer.id); }} />
-                  <FontAwesomeIcon icon={faTrash} onClick={(e) => { e.stopPropagation(); handleDeleteClick(answer.questionId, answer.id); }} />
+                  <FontAwesomeIcon
+                    icon={faEdit}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log('Edit icon clicked');
+                      console.log('answer.questionId:', answer.questionId);
+                      console.log('answer.id:', answer.id);
+                      handleEditClick(answer.questionId, answer.id);
+                    }}
+                  />
+                  <FontAwesomeIcon
+                    icon={faTrash}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log('Trash icon clicked');
+                      console.log('answer.questionId:', answer.questionId);
+                      console.log('answer.id:', answer.id);
+                      handleDeleteClick( answer.id);
+                    }}
+                  />
                 </EditDeleteIcons>
                 <AnswerStat>
-                  <span>{answer.responses.length} réponses</span>
+                  <span>{answer.responses ? answer.responses.length : 0} réponses</span>
                 </AnswerStat>
                 <AnswerTitleArea>
                   <AnswerLink>

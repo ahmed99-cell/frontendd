@@ -4,6 +4,8 @@ import Sidebar from './homeComponents/sidebar';
 import '../client/Customers.css';
 import UserCard from './homeComponents/UserCard';
 import axios from 'axios';
+import { TextField, InputAdornment } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 
 const Customers = () => {
   const Token = localStorage.getItem('token');
@@ -18,6 +20,7 @@ const Customers = () => {
         },
       });
       setUsers(response.data);
+      console.log('user',response.data);
     } catch (error) {
       console.error('Erreur lors de la récupération des utilisateurs :', error.message);
     }
@@ -47,17 +50,23 @@ const Customers = () => {
                 <div className="stack-index-content">
                   <div className="main">
                     <h1 style={{ marginTop: '-20px' }}>Users</h1>
-                    <div className="search-bar">
-                      <input
+                    <div className="search-bar" style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                      <TextField
                         type="text"
-                        placeholder="Search users..."
+                        placeholder="Find a user"
                         value={searchTerm}
                         onChange={handleSearchChange}
+                        variant="outlined"
+                        size="small"
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <SearchIcon />
+                            </InputAdornment>
+                          ),
+                        }}
                         style={{
-                          width: '100%',
-                          padding: '10px',
-                          margin: '20px 0',
-                          border: '1px solid #ccc',
+                          width: '200px',
                           borderRadius: '4px',
                         }}
                       />
@@ -66,7 +75,7 @@ const Customers = () => {
                       {filteredUsers.map((user, index) => (
                         <UserCard
                           key={index}
-                          id={user.id}
+                          id={user.matricul}
                           username={user.username}
                           email={user.email}
                           score={"100"}

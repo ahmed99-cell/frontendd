@@ -96,16 +96,16 @@ const AuthRegister = ({ title, subtitle, subtext }) => {
 
             <Box component="form" onSubmit={handleSubmit}>
                 <Stack mb={3}>
-                    <Typography variant="subtitle1" fontWeight={600} style={{color:"black"}} component="label" htmlFor='prenom' mb="4px">First Name</Typography>
+                    <Typography variant="subtitle1" fontWeight={600} style={{color:"black"}} component="label" htmlFor='prenom' mb="4px">First Name <span style={{ color: "red" }}>*</span></Typography>
                     <CustomTextField id="prenom" name="prenom" value={formData.prenom} onChange={handleChange} variant="outlined" fullWidth />
                     {errors.prenom && <Typography variant="body2" color="error">{errors.prenom}</Typography>}
-                    <Typography variant="subtitle1" fontWeight={600} style={{color:"black"}} component="label" htmlFor='nom' mb="4px">Last Name</Typography>
+                    <Typography variant="subtitle1" fontWeight={600} style={{color:"black"}} component="label" htmlFor='nom' mb="4px">Last Name <span style={{ color: "red" }}>*</span></Typography>
                     <CustomTextField id="nom" name="nom" value={formData.nom} onChange={handleChange} variant="outlined" fullWidth />
                     {errors.nom && <Typography variant="body2" color="error">{errors.nom}</Typography>}
-                    <Typography variant="subtitle1" fontWeight={600} style={{color:"black"}} component="email" htmlFor='email' mb="4px">Email Address</Typography>
+                    <Typography variant="subtitle1" fontWeight={600} style={{color:"black"}} component="email" htmlFor='email' mb="4px">Email Address <span style={{ color: "red" }}>*</span></Typography>
                     <CustomTextField id="email" name="email" value={formData.email} onChange={handleChange} variant="outlined" fullWidth />
                     {errors.email && <Typography variant="body2" color="error">{errors.email}</Typography>}
-                    <Typography variant="subtitle1" fontWeight={600} style={{color:"black"}} component="label" htmlFor='username' mb="4px">Username</Typography>
+                    <Typography variant="subtitle1" fontWeight={600} style={{color:"black"}} component="label" htmlFor='username' mb="4px">Username <span style={{ color: "red" }}>*</span></Typography>
                     <CustomTextField id="username" name="username" value={formData.username} onChange={handleChange} variant="outlined" fullWidth />
                     {errors.username && <Typography variant="body2" color="error">{errors.username}</Typography>}
                     

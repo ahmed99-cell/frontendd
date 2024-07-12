@@ -122,7 +122,7 @@ const QuestionOnTags = () => {
           <Header2
           />{' '}
  <p className='ms-2'>
-        Total des questions de {tag.name}: {questionDatas.length} - {tag.description}
+        Total des questions {tag.name}: {questionDatas.length} - {tag.description}
       </p>
            { sortedQuestions.map((question, index) => (
                 <StyledQuestionRow key={index}>

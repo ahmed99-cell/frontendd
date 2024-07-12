@@ -85,12 +85,11 @@ const Router = [
       { path: '/client/tags', element: <Tags /> },
       {path : '/client/profile', element: <UserProfile />},
       { path:"/client/questionOntags/:tag", element:<QuestionOnTags /> },
-      {path : '/client/Myquestions', element: <ChartComponent/>},
+      {path : '/client/user/:userId', element: <ChartComponent/>},
       {path : '/client/Mesquestions', element: <MesQuestions/>},
       {path : '/client/Mesanswers', element: <AnswersPage/>},
       {path : '/client/MesQuestionsFavorits', element: <MesQuestionsFavorites/>},
-      { path: '/client/user/:id', element: <ChartComponent /> }
-      
+      { path: '/client/user', element: <ChartComponent /> }
 
 
 

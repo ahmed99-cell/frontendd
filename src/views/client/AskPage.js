@@ -7,8 +7,10 @@ import Swal from 'sweetalert2';
 import Select from 'react-select';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserSecret } from '@fortawesome/free-solid-svg-icons';
+import { useTranslation } from 'react-i18next';
 
 const AskPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const question = location.state?.question;
@@ -57,7 +59,7 @@ const AskPage = () => {
       }
     }
   }, []);
-  
+
   useEffect(() => {
     if (question) {
       setExistingImage(question.image);
@@ -69,10 +71,11 @@ const AskPage = () => {
     event.preventDefault(); // Prevent the form from submitting normally
 
     // Retrieve the authentication token from localStorage
+    const votreToken = localStorage.getItem('token');
 
     // Check if the token is present
     if (!votreToken) {
-      alert('Please log in to ask a question.');
+      alert(t('Please log in to ask a question.'));
       navigate('/auth/login'); // Redirect to the login page
       return;
     }
@@ -84,13 +87,20 @@ const AskPage = () => {
     };
 
     const formData = new FormData();
-    formData.append('questionRequest.title', title);
-    formData.append('questionRequest.content', content);
+    
+    // Convert the questionRequest data to a JSON string and append it
+    const questionRequest = {
+      title: title,
+      content: content,
+      tagIds: selectedTags.map(tag => tag.value),
+      userAnonymous: isAnonymous
+    };
+
+    formData.append('questionRequest', JSON.stringify(questionRequest));
+    
     if (file) {
       formData.append('file', file);
     }
-    formData.append('tagIds', selectedTags.map(tag => tag.value));
-    formData.append('userAnonymous', isAnonymous);
 
     if (isEditMode) {
       // Update question
@@ -100,8 +110,8 @@ const AskPage = () => {
         if (response.status === 200) {
           await Swal.fire({
             icon: 'success',
-            title: 'Success',
-            text: 'Question updated successfully!',
+            title: t('Success'),
+            text: t('Question updated successfully!'),
           });
 
           navigate('/client/questionpage'); // Redirect to home page or wherever you want
@@ -110,8 +120,8 @@ const AskPage = () => {
         console.error('Error:', error);
         await Swal.fire({
           icon: 'error',
-          title: 'Error',
-          text: 'An error occurred while updating the question. Please try again later.',
+          title: t('Error'),
+          text: t('An error occurred while updating the question. Please try again later.'),
         });
       }
     } else {
@@ -123,8 +133,8 @@ const AskPage = () => {
         if (response.status === 200) {
           await Swal.fire({
             icon: 'success',
-            title: 'Success',
-            text: 'Question created successfully!',
+            title: t('Success'),
+            text: t('Question created successfully!'),
           });
 
           navigate('/client/questionpage'); // Redirect to home page or wherever you want
@@ -133,12 +143,13 @@ const AskPage = () => {
         console.error('Error:', error);
         await Swal.fire({
           icon: 'error',
-          title: 'Error',
-          text: 'An error occurred while creating the question. Please try again later.',
+          title: t('Error'),
+          text: t('An error occurred while creating the question. Please try again later.'),
         });
       }
     }
   };
+
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -156,22 +167,21 @@ const AskPage = () => {
           <div className="card mt-5" style={{ backgroundColor: 'hsl(206,100%,97%)' }}>
             <div className="card-header">
               <h3>
-                <b>{isEditMode ? 'Update Question' : 'Ask a Public Question'}</b>
+                <b>{isEditMode ? t('Update Question') : t('Ask a Public Question')}</b>
               </h3>
             </div>
             <div className="card-body">
-              <h5 className="card-title">Writing a Good Question</h5>
+              <h5 className="card-title">{t('Writing a Good Question')}</h5>
               <p className="card-text">
-                You’re ready to ask a programming-related question and this form will help guide you
-                through the process.
+                {t('ready to ask')}
               </p>
-              <h5>Steps</h5>
+              <h5>{t('Steps')}</h5>
               <ul>
-                <li>Summarize your problem in a one-line title.</li>
-                <li>Describe your problem in more detail.</li>
-                <li>Describe what you tried and what you expected to happen.</li>
-                <li>Add “tags” which help surface your question to members of the community.</li>
-                <li>You can add a question as Anonyme.</li>
+                <li>{t('Summarize your problem in a one-line title.')}</li>
+                <li>{t('Describe your problem in more detail.')}</li>
+                <li>{t('Describe what you tried and what you expected to happen.')}</li>
+                <li>{t('Add “tags” which help surface your question to members of the community.')}</li>
+                <li>{t('You can add a question as an Anonyme User')}</li>
               </ul>
             </div>
           </div>
@@ -179,33 +189,35 @@ const AskPage = () => {
             <div className="card mb-3 mt-5">
               <div className="card-body">
                 <div className="form-group">
-                  <label htmlFor="exampleInputEmail1">Title</label>
+                  <label htmlFor="title">{t('Title')}</label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     className="form-control"
+                    id="title"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="exampleInputEmail1">Subject</label>
+                  <label htmlFor="content">{t('Subject')}</label>
                   <textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     className="form-control"
+                    id="content"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="exampleInputEmail1">Add file</label>
+                  <label htmlFor="file">{t('Add file')}</label>
                   {existingImage && (
                     <div>
                       <img src={existingImage} alt="Existing image" style={{ maxWidth: '100%', maxHeight: '200px', marginBottom: '10px' }} />
                     </div>
                   )}
                   <input
-                  id ="exampleInputEmail1"
+                    id="file"
                     type="file"
                     onChange={handleFileChange}
                     className="form-control"
@@ -217,18 +229,19 @@ const AskPage = () => {
             <div className="card mt-3">
               <div className="card-body">
                 <div className="form-group">
-                  <label htmlFor="exampleInputTags">Question Tags</label>
+                  <label htmlFor="tags">{t('Question Tags')}</label>
 
                   <Select
                     value={selectedTags}
                     onChange={handleTagChange}
                     options={tags.map((tag) => ({ value: tag.id, label: tag.name }))}
                     isMulti={true}
-                    placeholder="Select tags"
+                    placeholder={t('Select tags')}
+                    id="tags"
                   />
 
-                  <small id="emailHelp" className="form-text text-muted">
-                    Enter Question Tags
+                  <small className="form-text text-muted">
+                    {t('Enter Question Tags')}
                   </small>
                 </div>
               </div>
@@ -244,12 +257,12 @@ const AskPage = () => {
               />
               <label className="form-check-label" htmlFor="anonymousCheckbox">
                 <FontAwesomeIcon icon={faUserSecret} style={{ marginRight: '5px' }} />
-                Rester anonyme
+                {t('Rester anonyme')}
               </label>
             </div>
 
             <button type="submit" className="btn btn-danger custom-btn mt-5 mb-5">
-              {isEditMode ? 'Update Question' : 'Ask Question'}
+              {isEditMode ? t('Update Question') : t('Ask Question')}
             </button>
           </form>
         </div>

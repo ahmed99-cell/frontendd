@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "src/views/client/Acceuil.css";
 import doubt from "src/assets/images/backgrounds/doubt.png";
+import { useTranslation } from "react-i18next";
 
 const containerStyle = {
     display: 'flex',
@@ -15,6 +16,8 @@ const contentStyle = {
 };
 
 function Acceuil() {
+
+    const {t}= useTranslation();
     return (
         <div style={containerStyle}>
             <header style={{ height: '60px', marginTop: '20vh', zIndex: 1, backgroundColor: 'white' }}>
@@ -22,12 +25,12 @@ function Acceuil() {
                     <div className="row">
                         <div className="col-lg-6 col-md-12 col-xs-12 mx-4">
                             <div className="contents">
-                                <h2 className="head-title">DoubtOut <br /><small>-A Doubt Solving Platform</small></h2>
-                                <p>Find the best answer to your technical question, help others answer theirs. DoubtOut is a community-based space to find and contribute answers to technical challenges.</p>
+                                <h2 className="head-title">QRSopra<br /><small> {t('ASSP')}</small></h2>
+                                <p>{t('AcP')}</p>
                             </div>
                             <div className="d-flex justify-content-start">
                                 <Link to={'/client/questionpage'}>
-                                    <button className="btn btn-danger custom-btn">Get Started</button>
+                                    <button className="btn btn-danger custom-btn">{t('Get Started')}</button>
                                 </Link>
                             </div>
                         </div>

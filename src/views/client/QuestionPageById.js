@@ -80,6 +80,18 @@ const Icon = styled.div`
   margin-left: 10px;
   cursor: pointer;
 `;
+const Tag = styled.div`
+  display: inline-block;
+  margin-right: 5px;
+  background-color: rgb(0 0 0 / 10%);
+  color: #000000;
+  padding: 7px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+`;
+
+
 
 function QuestionsPageById() {
   const [question, setQuestion] = useState(null);
@@ -298,9 +310,9 @@ function QuestionsPageById() {
                     <div className="single-article-text">
                       <div className="single-artcile-bg" />
                       <p className="blog-meta">
-                        <span className="author">
-                          <i className="fas fa-user" />{' '}
-                        </span>
+                      <span className="author" style={{ marginLeft: '20px' }}>
+                       <i className="fas fa-user" />{' '}
+                       </span>
                         {question && question.file && (
                           <div
                             className="file"
@@ -367,7 +379,7 @@ function QuestionsPageById() {
           style={{ cursor: voteValue === 1 ? 'default' : 'pointer', color: voteValue === 1 ? 'green' : 'black' }}
           disabled={voteValue === 1}
         />
-{ totalVote === 1 ?(
+{ totalVote >= 1 ?(
         <span className='mx-4'> {totalVote} </span>
 
 ):(        <span className='mx-4'>0</span>
@@ -537,9 +549,12 @@ function QuestionsPageById() {
       </label>
     </div>
   </div>
-  <button type="submit">Post your answer</button>
+  <button className="btn"
+                              style={{
+                                marginRight: '20px',
+                                backgroundColor: '#cf022b',
+                                color: '#fff',}}type="submit">Post your answer</button>
 </form>
-
                         </div>
                       </div>
                     </div>

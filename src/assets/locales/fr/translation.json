@@ -1,0 +1,38 @@
+{"allQ":"Toutes les questions",
+"ASSP":"Une plateforme de solutions Sopra",
+"AcP":"Trouvez la meilleure réponse à votre question technique et aidez les autres à répondre aux leurs. SopraQR est un espace communautaire pour trouver et apporter des réponses aux défis techniques.",
+"Get Started":"Commencer",
+"Search":"Recherche",
+"Ask Question":"Poser une question",
+"Ask a Public Question":"Poser une question publique",
+"Writing a Good Question":"Rédiger une bonne question",
+"Answered":"Répondu",
+"Unanswered":"sans reponse",
+"votes":"votes",
+"Users":"Utilisateurs",
+"Title":"Titre",
+"Search by title":"Rechercher par titre ...",
+"All users":"Tous les Utilisateurs",
+"Anonymous":"Anonyme","answers":"réponses",
+"views":"vues",
+"asked":"demandé",
+"By":"Par",
+"Customers":"Clients",
+"Favoris":"Favoris","logout":"déconnexion",
+"ready to ask":"Vous êtes prêt à poser une question relative à la programmation et ce formulaire vous guidera tout au long du processus."
+,"Steps":"Étapes"
+,"Summarize your problem in a one-line title.":"Résumez votre problème dans un titre d'une ligne.",
+"Describe your problem in more detail.":"Décrivez votre problème plus en détail.",
+"Describe what you tried and what you expected to happen.":"Décrivez ce que vous avez essayé et ce que vous attendiez.",
+"Add “tags” which help surface your question to members of the community.":"Ajoutez des “tags”  qui aideront à faire connaître votre question aux membres de la communauté.",
+"Subject":"Sujet","Add file":"Ajouter Fichier","Select tags":"tags selecte","Question Tags":"Tags de question","Enter Question Tags":"Entrer les tags de la question",
+"Rester anonyme":"Rester anonyme",
+"tagdescription1" :"Un tag est un mot-clé ou une étiquette qui permet de classer votre question parmi d'autres,",
+"Ajouter Tag":"Ajouter Tag",
+"tagdescription2":"En utilisant les bonnes balises, il est plus facile pour les autres de trouver votre question et d'y répondre.",
+"Update Question":"Modifier Question",
+"You can add a question as an Anonyme User" :"Ajouter question en tant que Utilisateur anonyme",
+"Total Questions Favorites":"Total des questions Favoris"
+
+ 
+}

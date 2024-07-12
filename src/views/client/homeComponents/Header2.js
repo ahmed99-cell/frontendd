@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import axios from 'axios';
 import './Header2.css';
+import { useTranslation } from 'react-i18next';
 
 function Header2({ onDataUpdate  }) {
   const [activeFilter, setActiveFilter] = useState('');
-
+const {t}=useTranslation();
   useEffect(() => {
     fetchQuestions();
     console.log('response',onDataUpdate);
@@ -58,10 +59,10 @@ function Header2({ onDataUpdate  }) {
     <div className="main" style={{ marginTop: '70px', width: 'auto' }}>
       <div className="main-container">
         <div className="main-top" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ margin: '0', marginRight: 'auto' ,marginLeft:"5px"}}>All Questions</h2>
+          <h2 style={{ margin: '0', marginRight: 'auto' ,marginLeft:"5px"}}>{t('allQ')}</h2>
           <NavLink to="/client/askquestion">
             <button className="btn" style={{ marginRight: '20px', backgroundColor: '#cf022b', color: '#fff' }}>
-              Ask Question
+            {t('Ask Question')}
             </button>
           </NavLink>
         </div>
@@ -75,7 +76,7 @@ function Header2({ onDataUpdate  }) {
                 onClick={() => handleFilterChange('answered')}
                 activeClassName="active-tab"
               >
-                Answered
+              {t('Answered')}
               </NavLink>
               <NavLink
                 className={`main-tab ${activeFilter === 'votes' ? 'active-tab' : ''}`}
@@ -91,7 +92,7 @@ function Header2({ onDataUpdate  }) {
                 onClick={() => handleFilterChange('unanswered')}
                 activeClassName="active-tab"
               >
-                Unanswered
+               {t('Unanswered')}
               </NavLink>
             </div>
           </div>

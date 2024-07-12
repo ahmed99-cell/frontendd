@@ -6,14 +6,16 @@ import NewNavbar from './NewNavbar';
 import '../homeComponents/Tags.css';
 import Swal from 'sweetalert2';
 import '../homeComponents/swal.css';
-import { FaTrash, FaEdit } from 'react-icons/fa'; // Importer les icônes de suppression et de modification
+import { FaTrash, FaEdit } from 'react-icons/fa'; 
 import Darkmode from 'darkmode-js';
-
+import { useTranslation} from 'react-i18next';
 export default function Tags() {
   const [tags, setTags] = useState([]);
   const [expandedTagIds, setExpandedTagIds] = useState([]);
   const userRole = localStorage.getItem('role');
   const votreToken = localStorage.getItem('token');
+  const [isModerator, setIsModerator] = useState(false);
+  const {t} = useTranslation();
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -30,6 +32,24 @@ export default function Tags() {
     };
 
     fetchTags();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserRoles = async () => {
+      try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user && user.roles !== null) {
+          const userRoles = user.roles;
+          if (userRoles.includes("ROLE_MODERATOR")) {
+            setIsModerator(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user roles:', error.message);
+      }
+    };
+ 
+    fetchUserRoles();
   }, []);
 
   const handleAddTag = async () => {
@@ -181,16 +201,15 @@ export default function Tags() {
                   <div className="main">
                     <h1 style={{ marginTop: '-20px' }}>Tags</h1>
                     <div className="mt-5">
-                    {userRole !== 'ROLE_USER' ||
-                        (userRole !== 'ROLE_ADMIN' && (
-                          <button
-                            className="btn"
-                            style={{ float: 'right', backgroundColor: '#cf022b', color: '#fff' }}
-                            onClick={handleAddTag}
-                          >
-                            Ajouter Tag
-                          </button>
-                        ))}
+                    {isModerator && (
+                        <button
+                          className="btn"
+                          style={{ float: 'right', backgroundColor: '#cf022b', color: '#fff' }}
+                          onClick={handleAddTag}
+                        >
+                          {t('Ajouter Tag')}
+                        </button>
+                      )}
                       A tag is a keyword or label that categorizes your question with other, similar
                       questions.
                       <br />
@@ -226,21 +245,18 @@ export default function Tags() {
                                   {expandedTagIds.includes(tag.id) ? 'Less' : 'Learn More'}
                                 </button>
                               </p>
-                              {userRole !== 'ROLE_USER' ||
-                                (userRole !== 'ROLE_ADMIN' && (
-                                  <div
-                                    style={{ position: 'absolute', bottom: '5px', right: '5px' }}
-                                  >
-                                    <FaTrash
-                                      style={{ marginRight: '5px', cursor: 'pointer' }}
-                                      onClick={() => handleDeleteTag(tag.id)}
-                                    />
-                                    <FaEdit
-                                      style={{ cursor: 'pointer' }}
-                                      onClick={() => handleEditTag(tag.id)}
-                                    />
-                                  </div>
-                                ))}
+                              {isModerator && (
+                                <div style={{ position: 'absolute', bottom: '5px', right: '5px' }}>
+                                  <FaTrash
+                                    style={{ marginRight: '5px', cursor: 'pointer' }}
+                                    onClick={() => handleDeleteTag(tag.id)}
+                                  />
+                                  <FaEdit
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={() => handleEditTag(tag.id)}
+                                  />
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>

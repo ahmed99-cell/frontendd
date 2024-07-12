@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import NewNavbar from './NewNavbar';
 import Sidebar from './sidebar';
 import { FaUserCircle } from 'react-icons/fa'; // User icon
+import { NavLink, useLocation, useParams } from 'react-router-dom';
 
 const PageContainer = styled.div`
   display: flex;
@@ -56,7 +57,7 @@ const ChartTitle = styled.h2`
 const HorizontalLine = styled.hr`
   width: 100%;
   margin-top: 20px;
-  border: 1px solid ##1f1c1f;
+  border: 1px solid #1f1c1f;
 `;
 
 const truncateText = (text, maxLength) => {
@@ -78,6 +79,9 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 const ChartComponent = () => {
+ // const { id } = useParams();
+  const location = useLocation();
+  const id = new URLSearchParams(location.search).get('id');
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState([]);
   const [questionChartData, setQuestionChartData] = useState([]);
@@ -85,19 +89,19 @@ const ChartComponent = () => {
   const [userSince, setUserSince] = useState('');
   const [userName, setUserName] = useState('');
   const [userPoints, setUserPoints] = useState(0);
-  const userId = 1;
-  
-
+const userId = id;
+  // Assuming the userId is dynamic and can be fetched from props or a higher component
+console.log('UserrrrrrrrrrrrID', id)
   useEffect(() => {
-    if (userId) {
+    if (id) {
       const fetchData = async () => {
         try {
           // Fetch user info
-          const userResponse = await axios.get(`http://localhost:8082/api/user/${userId}`);
+          const userResponse = await axios.get(`http://localhost:8082/api/user/${id}`);
           setUserName(userResponse.data.userName);
 
           // Fetch reputation info
-          const reputationResponse = await axios.get(`http://localhost:8082/api/reputations/${userId}`);
+          const reputationResponse = await axios.get(`http://localhost:8082/api/reputations/${id}`);
           setUserPoints(reputationResponse.data.score);
 
           // Fetch questions and answers
@@ -135,7 +139,7 @@ const ChartComponent = () => {
 
       fetchData();
     }
-  }, [userId]);
+  }, [id]);
 
   const processQuestionChartData = (data) => {
     const tagCount = {};
@@ -176,7 +180,7 @@ const ChartComponent = () => {
   };
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28ED0', '#50C878', '#FF6347', '#4682B4'];
-  
+
   const formatDate = (dateString) => {
     if (dateString === 'No questions created yet') {
       return dateString;
@@ -198,7 +202,7 @@ const ChartComponent = () => {
             </ProfileIcon>
             <UserInfo>
               <p>{userName}</p>
-              <p>User since: {userSince !== 'No questions created yet' ? new Date(userSince).toLocaleDateString() : userSince}</p>
+              <p>User since: {userSince !== 'No questions created yet' ? formatDate(userSince) : userSince}</p>
               <p>Points: {userPoints}</p>
             </UserInfo>
           </ProfileSection>
@@ -257,4 +261,3 @@ const ChartComponent = () => {
 };
 
 export default ChartComponent;
-

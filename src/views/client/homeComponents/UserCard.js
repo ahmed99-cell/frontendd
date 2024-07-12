@@ -22,7 +22,7 @@ const UserCard = ({ id, username, email }) => {
   }, [id]);
 
   const handleClick = () => {
-    navigate(`/client/user/${id}`);
+    navigate(`/client/user?id=${id}`);
   };
 
   return (

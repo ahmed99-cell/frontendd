@@ -237,6 +237,7 @@ const MesQuestions = () => {
                   <QuestionLink to={`/questions/${question.id}`}>
                     {question.title || 'No title'}
                   </QuestionLink>
+                  <div>{question.content}</div>
                   <div>
                     {question.tags && question.tags.map((tag, tagIndex) => (
                       <Tag key={tagIndex}>{typeof tag === 'object' ? tag.name : tag}</Tag>

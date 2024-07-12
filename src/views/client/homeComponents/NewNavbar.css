@@ -1,5 +1,5 @@
 @import url("https://fonts.googleapis.com/css?family=Montserrat:400,400i,700");
-
+ 
 .title1{
     width:25%;
      position: absolute;
@@ -7,7 +7,7 @@
      right: 20px;
      z-index: 1;
 }
-
+ 
 body {
   box-sizing: border-box;
 }
@@ -32,7 +32,7 @@ h2 {
 .card__copy {
   padding: 20px;
 }
-
+ 
 .dropdown:hover .dropdown-menu{
   display: block;
   border-style:none;
@@ -41,7 +41,7 @@ h2 {
     background-color: #cf022b;
     border-color: #cf022b;
   }
-  
+ 
   .custom-btn:hover {
     background-color: #cf022b;
     border-color: #cf022b;
@@ -50,3 +50,60 @@ h2 {
     width: 500px;
     margin-right:  .5rem !important;
   }
+  .notification-icon {
+    position: relative;
+    display: inline-block;
+  }
+ 
+  .notification-icon .badge-notification {
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    font-size: 12px;
+    padding: 3px 6px;
+  }
+ 
+  /* NewNavbar.css */
+ 
+  .notifications-dropdown {
+    position: absolute;
+    top: 100%; /* Position right below the icon */
+    right: 0;
+    width: 300px; /* Adjust width as needed */
+    max-height: 300px; /* Limit height for scrolling */
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000; /* Ensure it's above other content */
+    padding: 10px;
+  }
+ 
+  .notification-item {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    cursor: pointer;
+  }
+ 
+  .notification-item.read {
+    background-color: #f0f0f0;
+  }
+ 
+  .notification-item.unread {
+    background-color: #fff;
+  }
+ 
+  .notification-item:hover {
+    background-color: #f0f0f0;
+  }
+ 
+  .checkbox-label {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+  }
+ 
+  .checkbox-label input {
+    margin-right: 5px;
+  }
+ 
