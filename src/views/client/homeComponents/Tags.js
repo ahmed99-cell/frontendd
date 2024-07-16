@@ -20,12 +20,13 @@ export default function Tags() {
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const response = await axios.get('http://localhost:8082/api/tags/getAll', {
+        const response = await axios.get('http://localhost:8080/api/tags/getAll', {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
         });
         setTags(response.data);
+        console.log(response.data)
       } catch (error) {
         console.error('Error fetching tags:', error.message);
       }
@@ -70,13 +71,13 @@ export default function Tags() {
     if (formValues && formValues.name) {
       // Call API to add the new tag
       try {
-        await axios.post('http://localhost:8082/api/tags/create', formValues, {
+        await axios.post('http://localhost:8080/api/tags/create', formValues, {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
         });
         // Refresh the tags list
-        const response = await axios.get('http://localhost:8082/api/tags/getAll', {
+        const response = await axios.get('http://localhost:8080/api/tags/getAll', {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
@@ -123,7 +124,7 @@ export default function Tags() {
 
     if (confirmation.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:8082/api/tags/${tagId}`, {
+        await axios.delete(`http://localhost:8080/api/tags/${tagId}`, {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
@@ -157,12 +158,13 @@ export default function Tags() {
 
     if (updatedTag) {
       try {
-        await axios.put(`http://localhost:8082/api/tags/${tagId}`, updatedTag, {
+        await axios.put(`http://localhost:8080/api/tags/${tagId}`, updatedTag, {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
         });
         Swal.fire('Tag updated successfully!', '', 'success');
+        window.location.reload();
 
         // Update only the tag's description
         setTags((prevTags) =>

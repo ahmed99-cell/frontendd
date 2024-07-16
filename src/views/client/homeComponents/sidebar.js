@@ -38,7 +38,7 @@ const Sidebar = () => {
 
   return (
     <div className="">
-      <div style={{ height: sidebarHeight, minHeight: '100%', backgroundColor: '#f0f0f0', width: '250px' }}>
+      <div style={{ height: sidebarHeight, minHeight: '110%', backgroundColor: '#f0f0f0', width: '250px' }}>
         <div
           className="d-flex flex-column flex-shrink-0 p-3 bg-light"
           style={{ width: '250px', height: '100%', boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)" }}

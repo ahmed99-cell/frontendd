@@ -14,13 +14,13 @@ const Customers = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:8082/api/users', {
+      const response = await axios.get('http://localhost:8080/api/users', {
         headers: {
           Authorization: `Bearer ${Token}`,
         },
       });
       setUsers(response.data);
-      console.log('user',response.data);
+      console.log('user', response.data);
     } catch (error) {
       console.error('Erreur lors de la récupération des utilisateurs :', error.message);
     }
@@ -48,9 +48,9 @@ const Customers = () => {
             <div className="">
               <div className="stack-index">
                 <div className="stack-index-content">
-                  <div className="main">
-                    <h1 style={{ marginTop: '-20px' }}>Users</h1>
-                    <div className="search-bar" style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                  <div className="main" style={{marginTop:"10px"}}>
+                    <h1 style={{ marginTop: '-20px',color:"black",fontFamily:"inherit",marginLeft:"30PX" }}>Users</h1>
+                    <div className="search-bar" style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px',marginTop:"-10px",marginLeft:"70%" }}>
                       <TextField
                         type="text"
                         placeholder="Find a user"
@@ -71,10 +71,10 @@ const Customers = () => {
                         }}
                       />
                     </div>
-                    <div className="mt-5 user-cards-container">
+                    <div className="mt-8 user-cards-container ">
                       {filteredUsers.map((user, index) => (
                         <UserCard
-                          key={index}
+                          key={user.matricul}
                           id={user.matricul}
                           username={user.username}
                           email={user.email}

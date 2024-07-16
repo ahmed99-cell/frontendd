@@ -19,7 +19,7 @@ const AuthResetPassword = ({ subtext }) => {
 
     try {
       // Envoyer les données du formulaire au backend pour réinitialiser le mot de passe
-      await axios.post('http://localhost:8082/api/auth/reset-password', {
+      await axios.post('http://localhost:8080/api/auth/reset-password', {
         email: email,
         oldPassword: oldPassword,
         newPassword: newPassword,

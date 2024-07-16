@@ -37,7 +37,7 @@ const Pagination = ({ postsPerPage, totalPosts, paginate, currentPage }) => {
 
   return (
     <nav aria-label="Page navigation example" style={{}} >
-      <ul className="pagination" style={{marginTop:"10px",marginBottom:"-40px"}}>
+      <ul className="pagination" style={{marginTop:"10px",marginBottom:"-40px",marginLeft:"60px"}}>
         <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`} style={{}}>
           <button className="page-link" style={{marginLeft:"120px"}} onClick={() => currentPage > 1 && paginate(currentPage - 1)} aria-label="Previous">
             <span aria-hidden="true" style={{color:"grey"}}>&laquo;</span>

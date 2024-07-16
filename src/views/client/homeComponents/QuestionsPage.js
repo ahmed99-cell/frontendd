@@ -15,6 +15,7 @@ import Darkmode from 'darkmode-js';
 import { icon } from '@fortawesome/fontawesome-svg-core';
 import '../homeComponents/QuestionsPage.css';
 import { useTranslation } from 'react-i18next';
+import { Margin } from '@mui/icons-material';
 const QuestionStat = styled.div`
   text-align: center;
   display: inline-block;
@@ -233,7 +234,7 @@ useEffect(() => {
     
   const fetchQuestionData = async (questionId) => {
     try {
-      const response = await fetch(`http://localhost:8082/api/questions/${questionId}`);
+      const response = await fetch(`http://localhost:8080/api/questions/${questionId}`);
       const data = await response.json();
       // Update question data in the state
       setQuestionData((prevData) =>
@@ -246,7 +247,7 @@ useEffect(() => {
 
   const fetchAllQuestions = async () => {
     try {
-      const response = await fetch('http://localhost:8082/api/questions/all', {
+      const response = await fetch('http://localhost:8080/api/questions/all', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -289,7 +290,7 @@ useEffect(() => {
 
   const handleAllQuestionsClick = async () => {
     try {
-      const response = await fetch('http://localhost:8082/api/questions/all', {
+      const response = await fetch('http://localhost:8080/api/questions/all', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -319,7 +320,7 @@ useEffect(() => {
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const response = await axios.get('http://localhost:8082/api/tags/getAll', {
+        const response = await axios.get('http://localhost:8080/api/tags/getAll', {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
@@ -332,7 +333,7 @@ useEffect(() => {
 
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:8082/api/users', {
+        const response = await axios.get('http://localhost:8080/api/users', {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
@@ -366,7 +367,7 @@ useEffect(() => {
     };
 
     try {
-      const response = await axios.post('http://localhost:8082/api/questions/all', requestData, {
+      const response = await axios.post('http://localhost:8080/api/questions/all', requestData, {
         headers: {
           Authorization: `Bearer ${votreToken}`,
         },
@@ -399,7 +400,7 @@ useEffect(() => {
  
       if (isQuestionFavorite) {
         const favoriteId = question.favorites[0].id;
-        const response = await axios.delete(`http://localhost:8082/api/favorites/${favoriteId}`, {
+        const response = await axios.delete(`http://localhost:8080/api/favorites/${favoriteId}`, {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
@@ -413,7 +414,7 @@ useEffect(() => {
         }
       } else {
         const response = await axios.post(
-          `http://localhost:8082/api/favorites/markQuestionAsFavorite/${questionId}`,
+          `http://localhost:8080/api/favorites/markQuestionAsFavorite/${questionId}`,
           {},
           {
             headers: {
@@ -578,6 +579,7 @@ useEffect(() => {
               totalPosts={questionDatas.length}
               paginate={paginate}
               currentPage={currentPage}
+              style={{Margin:10 }}
             />
           </>
         </div>

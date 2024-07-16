@@ -16,6 +16,7 @@ import ChartComponent from 'src/views/client/homeComponents/Myquestions';
 import AnswersPage from 'src/views/client/homeComponents/Mesanswers';
 import MesQuestions from 'src/views/client/homeComponents/Mesquestions';
 import MesQuestionsFavorites from 'src/views/client/MesQuestionsFavorits';
+import ChatBox from 'src/views/client/ChatBox';
 
 
 
@@ -89,7 +90,9 @@ const Router = [
       {path : '/client/Mesquestions', element: <MesQuestions/>},
       {path : '/client/Mesanswers', element: <AnswersPage/>},
       {path : '/client/MesQuestionsFavorits', element: <MesQuestionsFavorites/>},
-      { path: '/client/user', element: <ChartComponent /> }
+      { path: '/client/user', element: <ChartComponent /> },
+      { path: '/client/chatbox', element: <ChatBox /> }
+
 
 
 

@@ -54,7 +54,7 @@ const AuthRegister = ({ title, subtitle, subtext }) => {
         }
         try {
             // Envoyez les données du formulaire au backend
-            const response = await axios.post('http://localhost:8082/api/auth/signup', formData);
+            const response = await axios.post('http://localhost:8080/api/auth/signup', formData);
             console.log(response.data);
             alert('Inscription réussie !');
             setLoading(false); // Définir l'état de chargement sur false après la réception de la réponse

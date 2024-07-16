@@ -113,7 +113,7 @@ function QuestionsPageById() {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `http://localhost:8082/api/questions/${questionId}/answers`,
+        `http://localhost:8080/api/questions/${questionId}/answers`,
         { content: answer },
         {
           headers: {
@@ -146,7 +146,7 @@ function QuestionsPageById() {
   const fetchQuestionById = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:8082/api/questions/${questionId}`, {
+      const response = await axios.get(`http://localhost:8080/api/questions/${questionId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -176,7 +176,7 @@ function QuestionsPageById() {
 
     const entityType = 'Question';
     const entityId = questionId
-  axios.get(`http://localhost:8082/api/votes/status`, {
+  axios.get(`http://localhost:8080/api/votes/status`, {
     params: {
       entityType,
       entityId,
@@ -196,7 +196,7 @@ function QuestionsPageById() {
   
     const incrementView = async () => {
       try {
-        await axios.put(`http://localhost:8082/api/questions/${questionId}/increment-view`);
+        await axios.put(`http://localhost:8080/api/questions/${questionId}/increment-view`);
         console.log("View count incremented successfully.");
       } catch (error) {
         console.error("Error incrementing view count:", error);
@@ -229,7 +229,7 @@ function QuestionsPageById() {
       }
 
       const response = await axios.post(
-        `http://localhost:8082/api/questions/${questionId}/answers/${parentAnswerId}/responses`,
+        `http://localhost:8080/api/questions/${questionId}/answers/${parentAnswerId}/responses`,
         { content: replyContent },
         {
           headers: {
@@ -248,7 +248,7 @@ function QuestionsPageById() {
 
 
   const handleVote = (value) => {
-    axios.post(`http://localhost:8082/api/votes/Question/${questionId}`, null, {
+    axios.post(`http://localhost:8080/api/votes/Question/${questionId}`, null, {
       params: {
         userId,
         value
@@ -266,7 +266,7 @@ function QuestionsPageById() {
     });
   };  
   const handleVote1 = (value,id) => {
-    axios.post(`http://localhost:8082/api/votes/Answer/${id}`, null, {
+    axios.post(`http://localhost:8080/api/votes/Answer/${id}`, null, {
       params: {
         userId,
         value

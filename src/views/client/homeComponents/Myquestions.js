@@ -4,8 +4,8 @@ import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import styled from 'styled-components';
 import NewNavbar from './NewNavbar';
 import Sidebar from './sidebar';
-import { FaUserCircle } from 'react-icons/fa'; // User icon
-import { NavLink, useLocation, useParams } from 'react-router-dom';
+import { FaUserCircle } from 'react-icons/fa';
+import { useLocation } from 'react-router-dom';
 
 const PageContainer = styled.div`
   display: flex;
@@ -26,7 +26,7 @@ const MainContent = styled.div`
 const ProfileSection = styled.div`
   display: flex;
   align-items: center;
-  margin-top: 60px; /* Adjusted margin to move it away from the navbar */
+  margin-top: 60px;
 `;
 
 const ProfileIcon = styled.div`
@@ -37,13 +37,13 @@ const ProfileIcon = styled.div`
 const UserInfo = styled.div`
   display: flex;
   flex-direction: column;
-  margin-left: 20px; /* Adjusted margin to ensure there is space between icon and text */
+  margin-left: 20px;
 `;
 
 const ChartsContainer = styled.div`
   display: flex;
   justify-content: space-around;
-  margin-top: 40px; /* Adjusted margin to ensure charts are spaced correctly */
+  margin-top: 40px;
 `;
 
 const ChartWrapper = styled.div`
@@ -79,7 +79,6 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 const ChartComponent = () => {
- // const { id } = useParams();
   const location = useLocation();
   const id = new URLSearchParams(location.search).get('id');
   const [questions, setQuestions] = useState([]);
@@ -89,44 +88,44 @@ const ChartComponent = () => {
   const [userSince, setUserSince] = useState('');
   const [userName, setUserName] = useState('');
   const [userPoints, setUserPoints] = useState(0);
-const userId = id;
-  // Assuming the userId is dynamic and can be fetched from props or a higher component
-console.log('UserrrrrrrrrrrrID', id)
+
   useEffect(() => {
     if (id) {
+      console.log(id)
       const fetchData = async () => {
         try {
           // Fetch user info
-          const userResponse = await axios.get(`http://localhost:8082/api/user/${id}`);
-          setUserName(userResponse.data.userName);
+          const userResponse = await axios.get(`http://localhost:8080/api/user/${id}`);
+          setUserName(userResponse.data.username);
 
           // Fetch reputation info
-          const reputationResponse = await axios.get(`http://localhost:8082/api/reputations/${id}`);
+          const reputationResponse = await axios.get(`http://localhost:8080/api/reputations/${id}`);
           setUserPoints(reputationResponse.data.score);
 
-          // Fetch questions and answers
-          const questionsResponse = await axios.get('http://localhost:8082/api/questions/by-user-and-date', {
+          
+          const questionsResponse = await axios.get('http://localhost:8080/api/questions/by-user-and-date', {
             params: {
-              userId,
+              userId: id,
               startDate: '2024-01-01',
               endDate: '2024-12-31'
             }
           });
 
-          const answersResponse = await axios.get('http://localhost:8082/api/questions/byuseranddate', {
+          const answersResponse = await axios.get('http://localhost:8080/api/questions/byuseranddate', {
             params: {
-              userId,
+              userId: id,
               startDate: '2024-01-01',
               endDate: '2024-12-31'
             }
           });
 
           setQuestions(questionsResponse.data);
+          console.log(questionsResponse.data)
           setAnswers(answersResponse.data);
           processQuestionChartData(questionsResponse.data);
           processAnswerChartData(answersResponse.data);
 
-          // Set user since date as the date of the first question
+          
           if (questionsResponse.data.length > 0) {
             setUserSince(questionsResponse.data[0].createdAt);
           } else {
@@ -171,9 +170,9 @@ console.log('UserrrrrrrrrrrrID', id)
     });
 
     const formattedData = Object.keys(answerCount).map(content => ({
-      name: truncateText(content, 20), // Truncate the text to 20 characters
+      name: truncateText(content, 20),
       value: answerCount[content],
-      fullContent: content // Keep the full content for tooltip
+      fullContent: content
     }));
 
     setAnswerChartData(formattedData);

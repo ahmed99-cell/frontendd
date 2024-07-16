@@ -11,7 +11,7 @@ const UserCard = ({ id, username, email }) => {
   useEffect(() => {
     const fetchReputationScore = async () => {
       try {
-        const reputationResponse = await axios.get(`http://localhost:8082/api/reputations/${id}`);
+        const reputationResponse = await axios.get(`http://localhost:8080/api/reputations/${id}`);
         setUserPoints(reputationResponse.data.score);
       } catch (error) {
         console.error('Error fetching reputation score:', error);

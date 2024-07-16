@@ -83,6 +83,7 @@ const AnswersPage = () => {
   const accessToken = userData?.accessToken;
   const userId = userData?.id;
   const [answers, setAnswers] = useState([]);
+
   const [startDate, setStartDate] = useState('2024-01-01');
   const [endDate, setEndDate] = useState('2024-12-31');
   const navigate = useNavigate();
@@ -90,13 +91,16 @@ const AnswersPage = () => {
   useEffect(() => {
     const fetchAnswers = async () => {
       try {
-        const response = await axios.get(`http://localhost:8082/api/questions/byuseranddate?userId=${userId}&startDate=${startDate}&endDate=${endDate}`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
+        const response = await axios.get(
+          `http://localhost:8080/api/questions/byuseranddate?userId=${userId}&startDate=${startDate}&endDate=${endDate}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
           },
-        });
-        console.log('Fetched answers:', response); 
-        response.data.forEach(answer => {
+        );
+        console.log('Fetched answers:', response);
+        response.data.forEach((answer) => {
           console.log('Answer data:', answer);
           if (!answer.questionId || !answer.id) {
             console.error('Missing questionId or answerId in fetched data');
@@ -126,8 +130,8 @@ const AnswersPage = () => {
     });
   };
 
-  const handleDeleteClick = async ( answerId) => {
-    if (!answerId) {
+  const handleDeleteClick = async (answerId, questionId) => {
+    if (!answerId || !questionId) {
       console.error('Invalid questionId or answerId for delete');
       return;
     }
@@ -143,12 +147,12 @@ const AnswersPage = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:8082/api/questions/answers/${answerId}`, {
+          await axios.delete(`http://localhost:8080/api/questions/${questionId}/answers/${answerId}`, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
           });
-          setAnswers(answers.filter(answer => answer.id !== answerId));
+          setAnswers(answers.filter((answer) => answer.id !== answerId));
           MySwal.fire({
             title: 'Deleted!',
             text: 'Your answer has been deleted.',
@@ -187,10 +191,9 @@ const AnswersPage = () => {
     <div>
       <NewNavbar />
       <div style={{ display: 'flex' }}>
-        <Sidebar className='h-100' />
+        <Sidebar className="h-100" />
         <div style={{ flex: 1 }}>
-          <Header2 />
-          <div style={{ padding: '20px' }}>
+          <div style={{ padding: '20px', marginTop: '100px' }}>
             <DateInputsContainer>
               <div>
                 <label htmlFor="startDate">Date de début :</label>
@@ -203,12 +206,7 @@ const AnswersPage = () => {
               </div>
               <div>
                 <label htmlFor="endDate">Date de fin :</label>
-                <input
-                  type="date"
-                  id="endDate"
-                  value={endDate}
-                  onChange={handleEndDateChange}
-                />
+                <input type="date" id="endDate" value={endDate} onChange={handleEndDateChange} />
               </div>
             </DateInputsContainer>
             <p>Total des réponses : {answers.length}</p>
@@ -219,9 +217,6 @@ const AnswersPage = () => {
                     icon={faEdit}
                     onClick={(e) => {
                       e.stopPropagation();
-                      console.log('Edit icon clicked');
-                      console.log('answer.questionId:', answer.questionId);
-                      console.log('answer.id:', answer.id);
                       handleEditClick(answer.questionId, answer.id);
                     }}
                   />
@@ -229,10 +224,7 @@ const AnswersPage = () => {
                     icon={faTrash}
                     onClick={(e) => {
                       e.stopPropagation();
-                      console.log('Trash icon clicked');
-                      console.log('answer.questionId:', answer.questionId);
-                      console.log('answer.id:', answer.id);
-                      handleDeleteClick( answer.id);
+                      handleDeleteClick(answer.id, answer.questionId);
                     }}
                   />
                 </EditDeleteIcons>
@@ -240,12 +232,8 @@ const AnswersPage = () => {
                   <span>{answer.responses ? answer.responses.length : 0} réponses</span>
                 </AnswerStat>
                 <AnswerTitleArea>
-                  <AnswerLink>
-                    {answer.content || 'No content'}
-                  </AnswerLink>
-                  <WhoAndWhen>
-                    répondue le {formatDate(answer.createdAt)}
-                  </WhoAndWhen>
+                  <AnswerLink>{answer.content || 'No content'}</AnswerLink>
+                  <WhoAndWhen>répondue le {formatDate(answer.createdAt)}</WhoAndWhen>
                 </AnswerTitleArea>
               </StyledAnswerRow>
             ))}

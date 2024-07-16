@@ -22,7 +22,7 @@ const ListUsers = () => {
 
   useEffect(() => {
     axios
-      .get('http://localhost:8082/api/users')
+      .get('http://localhost:8080/api/users')
       .then((response) => {
         // Récupérer l'utilisateur connecté depuis localStorage
         const userDataString = localStorage.getItem('user');
@@ -61,7 +61,7 @@ const ListUsers = () => {
     console.log("Suppression de l'utilisateur avec ID :", userId);
     // Envoyez une requête HTTP DELETE vers votre API backend pour supprimer l'utilisateur
     axios
-      .delete(`http://localhost:8082/api/user/${userId}`)
+      .delete(`http://localhost:8080/api/user/${userId}`)
       .then((response) => {
         alert('Utilisateur supprimé avec succès !');
         window.location.reload();
@@ -77,7 +77,7 @@ const ListUsers = () => {
   const handleRoleEdit = (userId, newRole) => {
     // Make an API call to update the user role
     axios
-      .put(`http://localhost:8082/api/${userId}/role`, { newRoleName: newRole })
+      .put(`http://localhost:8080/api/${userId}/role`, { newRoleName: newRole })
       .then((response) => {
         console.log(response);
         // Update the user role in the state

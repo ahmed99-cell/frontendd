@@ -140,7 +140,7 @@ function ProfilePage() {
       formDataToSubmit.append('roles', JSON.stringify(roles));
 
       const response = await axios.put(
-        `http://localhost:8082/api/user/${userId}`,
+        `http://localhost:8080/api/user/${userId}`,
         formDataToSubmit,
         {
           headers: {

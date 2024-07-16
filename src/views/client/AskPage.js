@@ -7,10 +7,8 @@ import Swal from 'sweetalert2';
 import Select from 'react-select';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserSecret } from '@fortawesome/free-solid-svg-icons';
-import { useTranslation } from 'react-i18next';
-
+ 
 const AskPage = () => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const question = location.state?.question;
@@ -25,11 +23,11 @@ const AskPage = () => {
   const [isAnonymous, setIsAnonymous] = useState(question ? question.userAnonymous : false);
   const [isEditMode, setIsEditMode] = useState(!!question);
   const [existingImage, setExistingImage] = useState(null);
-
+ 
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const response = await axios.get('http://localhost:8082/api/tags/getAll', {
+        const response = await axios.get('http://localhost:8080/api/tags/getAll', {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
@@ -41,124 +39,100 @@ const AskPage = () => {
     };
     fetchTags();
   }, []);
-
-  useEffect(() => {
-    if (editor.current) {
-      // Vérifier si l'éditeur est prêt
-      if (editor.current.editor) {
-        // L'éditeur est prêt, nous pouvons maintenant ajouter un écouteur pour l'événement 'ready'
-        editor.current.editor.events.on('ready', () => {
-          console.log('Editor is ready!');
-        });
-      } else {
-        // L'éditeur n'est pas encore prêt, attendons un instant et réessayons
-        setTimeout(() => {
-          console.log('Retrying editor initialization...');
-          // Rappel de useEffect pour réessayer l'initialisation
-        }, 1000); // Attendre 1 seconde avant de réessayer
-      }
-    }
-  }, []);
-
+ 
+ 
+ 
   useEffect(() => {
     if (question) {
       setExistingImage(question.image);
       setSelectedTags(question.tags.map((tag) => ({ value: tag.id, label: tag.name })));
+      console.log(question.tags)
     }
   }, [question]);
-
+ 
   const handleSubmit = async (event) => {
     event.preventDefault(); // Prevent the form from submitting normally
-
+ 
     // Retrieve the authentication token from localStorage
-    const votreToken = localStorage.getItem('token');
-
+ 
     // Check if the token is present
     if (!votreToken) {
-      alert(t('Please log in to ask a question.'));
+      alert('Please log in to ask a question.');
       navigate('/auth/login'); // Redirect to the login page
       return;
     }
-
+ 
     // Create a headers object with the authentication token
     const headers = {
       'Content-Type': 'multipart/form-data',
       Authorization: `Bearer ${votreToken}`, // Include the token in the Authorization header
     };
-
+ 
     const formData = new FormData();
-    
-    // Convert the questionRequest data to a JSON string and append it
-    const questionRequest = {
-      title: title,
-      content: content,
-      tagIds: selectedTags.map(tag => tag.value),
-      userAnonymous: isAnonymous
-    };
-
-    formData.append('questionRequest', JSON.stringify(questionRequest));
-    
+    formData.append('questionRequest.title', title);
+    formData.append('questionRequest.content', content);
     if (file) {
       formData.append('file', file);
     }
-
+    formData.append('tagIds', selectedTags.map(tag => tag.value));
+    formData.append('userAnonymous', isAnonymous);
+ 
     if (isEditMode) {
       // Update question
       try {
-        const response = await axios.put(`http://localhost:8082/api/questions/${question.id}`, formData, { headers });
-
+        const response = await axios.put(`http://localhost:8080/api/questions/${question.id}`, formData, { headers });
+ 
         if (response.status === 200) {
           await Swal.fire({
             icon: 'success',
-            title: t('Success'),
-            text: t('Question updated successfully!'),
+            title: 'Success',
+            text: 'Question updated successfully!',
           });
-
+ 
           navigate('/client/questionpage'); // Redirect to home page or wherever you want
         }
       } catch (error) {
         console.error('Error:', error);
         await Swal.fire({
           icon: 'error',
-          title: t('Error'),
-          text: t('An error occurred while updating the question. Please try again later.'),
+          title: 'Error',
+          text: 'An error occurred while updating the question. Please try again later.',
         });
       }
     } else {
       // Create new question
       try {
-        const response = await axios.post('http://localhost:8082/api/questions/create', formData, {
+        const response = await axios.post('http://localhost:8080/api/questions/create', formData, {
           headers: headers, // Pass the headers object to Axios
         });
         if (response.status === 200) {
           await Swal.fire({
             icon: 'success',
-            title: t('Success'),
-            text: t('Question created successfully!'),
+            title: 'Success',
+            text: 'Question created successfully!',
           });
-
+ 
           navigate('/client/questionpage'); // Redirect to home page or wherever you want
         }
       } catch (error) {
         console.error('Error:', error);
         await Swal.fire({
           icon: 'error',
-          title: t('Error'),
-          text: t('An error occurred while creating the question. Please try again later.'),
+          title: 'Error',
+          text: 'An error occurred while creating the question. Please try again later.',
         });
       }
     }
   };
-
-
+ 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
   };
-
+ 
   const handleTagChange = (selectedOptions) => {
     setSelectedTags(selectedOptions);
   };
-
+ 
   return (
     <>
       <NewNavbar />
@@ -167,21 +141,22 @@ const AskPage = () => {
           <div className="card mt-5" style={{ backgroundColor: 'hsl(206,100%,97%)' }}>
             <div className="card-header">
               <h3>
-                <b>{isEditMode ? t('Update Question') : t('Ask a Public Question')}</b>
+                <b>{isEditMode ? 'Update Question' : 'Ask a Public Question'}</b>
               </h3>
             </div>
             <div className="card-body">
-              <h5 className="card-title">{t('Writing a Good Question')}</h5>
+              <h5 className="card-title">Writing a Good Question</h5>
               <p className="card-text">
-                {t('ready to ask')}
+                You’re ready to ask a programming-related question and this form will help guide you
+                through the process.
               </p>
-              <h5>{t('Steps')}</h5>
+              <h5>Steps</h5>
               <ul>
-                <li>{t('Summarize your problem in a one-line title.')}</li>
-                <li>{t('Describe your problem in more detail.')}</li>
-                <li>{t('Describe what you tried and what you expected to happen.')}</li>
-                <li>{t('Add “tags” which help surface your question to members of the community.')}</li>
-                <li>{t('You can add a question as an Anonyme User')}</li>
+                <li>Summarize your problem in a one-line title.</li>
+                <li>Describe your problem in more detail.</li>
+                <li>Describe what you tried and what you expected to happen.</li>
+                <li>Add “tags” which help surface your question to members of the community.</li>
+                <li>You can add a question as Anonyme.</li>
               </ul>
             </div>
           </div>
@@ -189,35 +164,33 @@ const AskPage = () => {
             <div className="card mb-3 mt-5">
               <div className="card-body">
                 <div className="form-group">
-                  <label htmlFor="title">{t('Title')}</label>
+                  <label htmlFor="exampleInputEmail1">Title</label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     className="form-control"
-                    id="title"
                   />
                 </div>
-
+ 
                 <div className="form-group">
-                  <label htmlFor="content">{t('Subject')}</label>
+                  <label htmlFor="exampleInputEmail1">Subject</label>
                   <textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     className="form-control"
-                    id="content"
                   />
                 </div>
-
+ 
                 <div className="form-group">
-                  <label htmlFor="file">{t('Add file')}</label>
+                  <label htmlFor="exampleInputEmail1">Add file</label>
                   {existingImage && (
                     <div>
                       <img src={existingImage} alt="Existing image" style={{ maxWidth: '100%', maxHeight: '200px', marginBottom: '10px' }} />
                     </div>
                   )}
                   <input
-                    id="file"
+                  id ="exampleInputEmail1"
                     type="file"
                     onChange={handleFileChange}
                     className="form-control"
@@ -225,23 +198,22 @@ const AskPage = () => {
                 </div>
               </div>
             </div>
-
+ 
             <div className="card mt-3">
               <div className="card-body">
                 <div className="form-group">
-                  <label htmlFor="tags">{t('Question Tags')}</label>
-
+                  <label htmlFor="exampleInputTags">Question Tags</label>
+ 
                   <Select
                     value={selectedTags}
                     onChange={handleTagChange}
                     options={tags.map((tag) => ({ value: tag.id, label: tag.name }))}
                     isMulti={true}
-                    placeholder={t('Select tags')}
-                    id="tags"
+                    placeholder="Select tags"
                   />
-
-                  <small className="form-text text-muted">
-                    {t('Enter Question Tags')}
+ 
+                  <small id="emailHelp" className="form-text text-muted">
+                    Enter Question Tags
                   </small>
                 </div>
               </div>
@@ -257,12 +229,12 @@ const AskPage = () => {
               />
               <label className="form-check-label" htmlFor="anonymousCheckbox">
                 <FontAwesomeIcon icon={faUserSecret} style={{ marginRight: '5px' }} />
-                {t('Rester anonyme')}
+                Rester anonyme
               </label>
             </div>
-
+ 
             <button type="submit" className="btn btn-danger custom-btn mt-5 mb-5">
-              {isEditMode ? t('Update Question') : t('Ask Question')}
+              {isEditMode ? 'Update Question' : 'Ask Question'}
             </button>
           </form>
         </div>
@@ -270,5 +242,5 @@ const AskPage = () => {
     </>
   );
 };
-
+ 
 export default AskPage;
