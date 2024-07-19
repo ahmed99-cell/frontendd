@@ -16,7 +16,7 @@ body{
     font-family : Plus Jakarta Sans,sans-serif;
 }
 b,strong{
-   
+    
 }
 a{
     color : #fff;
@@ -53,9 +53,7 @@ function ProfilePage() {
     email: '',
     username: '',
     password: '',
-    avatar: null,
   });
-  const [avatarPreview, setAvatarPreview] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -65,12 +63,8 @@ function ProfilePage() {
       email: '',
       nom: '',
       prenom: '',
-      avatar: '',
     };
     setFormData(storedUserData);
-    if (storedUserData.avatar) {
-      setAvatarPreview(storedUserData.avatar);
-    }
   }, []);
 
   const handleChange = (event) => {
@@ -81,15 +75,6 @@ function ProfilePage() {
     }));
   };
 
-  const handleAvatarChange = (event) => {
-    const file = event.target.files[0];
-    setFormData((prevData) => ({
-      ...prevData,
-      avatar: file,
-    }));
-    setAvatarPreview(URL.createObjectURL(file));
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -98,7 +83,7 @@ function ProfilePage() {
     const userId = userData?.id;
 
     function getUserRole() {
-      const user = JSON.parse(localStorage.getItem('user'));
+      const user = JSON.parse(localStorage.getItem('user')); // Assurez-vous que l'objet utilisateur est bien stocké en JSON
       return user?.roles?.includes('ROLE_MODERATOR') ? 'moderator' : 'user';
     }
 
@@ -113,10 +98,10 @@ function ProfilePage() {
     }
 
     if (
-      !formData.prenom ||
-      !formData.nom ||
-      !formData.email ||
-      !formData.username
+      !formData.prenom.trim() ||
+      !formData.nom.trim() ||
+      !formData.email.trim() ||
+      !formData.username.trim()
     ) {
       setErrorMessage('All fields are required');
       return;
@@ -124,28 +109,19 @@ function ProfilePage() {
 
     try {
       const role = getUserRole();
-      const roles = role === 'mod' ? [{ name: 'ROLE_MODERATOR' }] : [{ name: 'ROLE_USER' }];
 
-      const formDataToSubmit = new FormData();
-      formDataToSubmit.append('prenom', formData.prenom);
-      formDataToSubmit.append('nom', formData.nom);
-      formDataToSubmit.append('email', formData.email);
-      formDataToSubmit.append('username', formData.username);
-      if (formData.password) {
-        formDataToSubmit.append('password', formData.password);
-      }
-      if (formData.avatar) {
-        formDataToSubmit.append('avatar', formData.avatar);
-      }
-      formDataToSubmit.append('roles', JSON.stringify(roles));
+      // Ajoutez les rôles en fonction du rôle de l'utilisateur
+      const roles = role === 'mod' ? [{ name: 'ROLE_MODERATOR' }] : [{ name: 'ROLE_USER' }];
 
       const response = await axios.put(
         `http://localhost:8080/api/user/${userId}`,
-        formDataToSubmit,
+        {
+          ...formData,
+          roles: roles, // Utilisez le rôle déterminé
+        },
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'multipart/form-data',
           },
         },
       );
@@ -158,6 +134,7 @@ function ProfilePage() {
         text: 'User-Profil updated successfully!',
       });
 
+      // Exclure le mot de passe lors de la sauvegarde dans le local storage
       const { password, ...userDataWithoutPassword } = formData;
       localStorage.setItem('user', JSON.stringify(userDataWithoutPassword));
       window.location.reload();
@@ -171,11 +148,12 @@ function ProfilePage() {
     }
   };
 
+
   return (
     <>
       <GlobalStyle />
       <NewNavbar />
-      <Container style={{ marginTop: '20px' }}>
+      <Container style={{ paddingTop: '110px' }}>
         <div className="container">
           <div className="row gutters">
             <div className="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
@@ -184,16 +162,11 @@ function ProfilePage() {
                   <div className="account-settings">
                     <div className="user-profile">
                       <div className="user-avatar">
-                        {avatarPreview ? (
-                          <img src={avatarPreview} alt="User Avatar" />
-                        ) : (
-                          <img
-                            src="https://bootdey.com/img/Content/avatar/avatar7.png"
-                            alt="Default Avatar"
-                          />
-                        )}
+                        <img
+                          src="https://bootdey.com/img/Content/avatar/avatar7.png"
+                          alt="Maxwell Admin"
+                        />
                       </div>
-                      <input type="file" onChange={handleAvatarChange} />
                       <h5 className="user-name">{formData.username}</h5>
                       <h6 className="user-email">{formData.email}</h6>
                     </div>
@@ -266,66 +239,66 @@ function ProfilePage() {
                           type="text"
                           className="form-control"
                           id="prenom"
-                          name="prenom"placeholder="Enter your new prenom"
+                          name="prenom"
+                          placeholder="Enter your new prenom"
                           value={formData.prenom}
                           onChange={handleChange}
-                          />
-                                                </div>
-                                              </div>
-                                            </div>
-                                            <div className="row gutters">
-                                              <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                                                <h6 className="mt-3 mb-2 text" style={{ color: '#cf022b' }}>
-                                                  Password
-                                                </h6>
-                                              </div>
-                                              <div className="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
-                                                <div className="form-group">
-                                                  <label htmlFor="password">New Password</label>
-                                                  <input
-                                                    type="password"
-                                                    className="form-control"
-                                                    id="password"
-                                                    name="password"
-                                                    placeholder="Enter your new password"
-                                                    value={formData.password}
-                                                    onChange={handleChange}
-                                                  />
-                                                </div>
-                                              </div>
-                                            </div>
-                                            <div className="row gutters" style={{ marginTop: '20px' }}>
-                                              <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                                                <div className="text-right" style={{ spaceBetween: '1px' }}>
-                                                  <Link
-                                                    to="/client/questionpage"
-                                                    className="btn btn-secondary"
-                                                    style={{ marginRight: '10px' }}
-                                                  >
-                                                    Cancel
-                                                  </Link>
-                                                  <button
-                                                    type="button"
-                                                    className="btn"
-                                                    style={{ marginRight: '20px', backgroundColor: '#cf022b', color: '#fff' }}
-                                                    onClick={handleSubmit}
-                                                  >
-                                                    Update
-                                                  </button>
-                                                </div>
-                                                {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-                                                {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </Container>
-                              </>
-                            );
-                          }
-                          
-                          export default ProfilePage;
-                          
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="row gutters">
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                      <h6 className="mt-3 mb-2 text" style={{ color: '#cf022b' }}>
+                        Password
+                      </h6>
+                    </div>
+                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                      <div className="form-group">
+                        <label htmlFor="password">New Password</label>
+                        <input
+                          type="password"
+                          className="form-control"
+                          id="password"
+                          name="password"
+                          placeholder="Enter your new password"
+                          value={formData.password}
+                          onChange={handleChange}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="row gutters" style={{ marginTop: '20px' }}>
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                      <div className="text-right" style={{ spaceBetween: '1px' }}>
+                        <Link
+                          to="/client/questionpage"
+                          className="btn btn-secondary"
+                          style={{ marginRight: '10px' }}
+                        >
+                          Cancel
+                        </Link>
+                        <button
+                          type="button"
+                          className="btn"
+                          style={{ marginRight: '20px', backgroundColor: '#cf022b', color: '#fff' }}
+                          onClick={handleSubmit}
+                        >
+                          Update
+                        </button>
+                      </div>
+                      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                      {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Container>
+    </>
+  );
+}
+
+export default ProfilePage;

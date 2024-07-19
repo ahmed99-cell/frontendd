@@ -473,15 +473,16 @@ useEffect(() => {
                     placeholder={t("Search by title")}
                     value={searchTitle}
                     onChange={(e) => setSearchTitle(e.target.value)}
-                    style={{ height: '35px' }}
+                    style={{ height: '38px' }}
                   />
                 </FilterItem>
-                <FilterItem>
+                <FilterItem >
                   <FilterItemLabel>{t('Users')}:</FilterItemLabel>
                   <FilterSelect
                     id="userSelect"
                     value={selectedUser}
                     onChange={(e) => setSelectedUser(e.target.value)}
+                    style={{height:"38px"}}
                   >
                     <option value="">{t('Select user')}</option>
                     {users.map((user) => (
@@ -509,7 +510,7 @@ useEffect(() => {
                   <button
                     onClick={handleSearch}
                     className="btn btn-outline-danger"
-                    style={{ marginTop: '27px' }}
+                    style={{ marginTop: '27px',marginLeft:"50px" }}
                   >
                     {t('Search')}
                   </button>

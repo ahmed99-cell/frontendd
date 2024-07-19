@@ -193,8 +193,8 @@ const MesQuestions = () => {
       <div style={{ display: 'flex' }}>
         <Sidebar className='h-100' />
         <div style={{ flex: 1 }}>
-          <Header2 />
-          <div style={{ padding: '20px' }}>
+        
+          <div style={{ padding: '20px' ,marginTop:"100px"}}>
             <DateInputsContainer>
               <div>
                 <label htmlFor="startDate">Date de début :</label>

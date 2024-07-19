@@ -9,7 +9,6 @@ import withReactContent from 'sweetalert2-react-content';
 
 import Sidebar from './sidebar';
 import NewNavbar from './NewNavbar';
-import Header2 from './Header2';
 
 const MySwal = withReactContent(Swal);
 
@@ -83,35 +82,25 @@ const AnswersPage = () => {
   const accessToken = userData?.accessToken;
   const userId = userData?.id;
   const [answers, setAnswers] = useState([]);
-
+  const [selectedAnswer, setSelectedAnswer] = useState({ id: null, content: '' });
   const [startDate, setStartDate] = useState('2024-01-01');
   const [endDate, setEndDate] = useState('2024-12-31');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchAnswers = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:8080/api/questions/byuseranddate?userId=${userId}&startDate=${startDate}&endDate=${endDate}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          },
-        );
-        console.log('Fetched answers:', response);
-        response.data.forEach((answer) => {
-          console.log('Answer data:', answer);
-          if (!answer.questionId || !answer.id) {
-            console.error('Missing questionId or answerId in fetched data');
-          }
-        });
-        setAnswers(response.data);
-      } catch (error) {
-        console.error('Error fetching answers:', error);
-      }
-    };
+  const fetchAnswers = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/questions/byuseranddate?userId=${userId}&startDate=${startDate}&endDate=${endDate}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      setAnswers(response.data);
+    } catch (error) {
+      console.error('Error fetching answers:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchAnswers();
   }, [userId, startDate, endDate, accessToken]);
 
@@ -123,11 +112,58 @@ const AnswersPage = () => {
     setEndDate(e.target.value);
   };
 
-  const handleEditClick = (questionId, answerId) => {
-    console.log('Attempting to edit:', { questionId, answerId });
-    navigate(`/client/question/${questionId}`, {
-      state: { isEditMode: true, answerId },
+  const handleEditClick = async (questionId, answerId) => {
+    const selected = answers.find(answer => answer.id === answerId);
+    if (!selected) {
+      console.error(`Answer with id ${answerId} not found.`);
+      return;
+    }
+
+    const { value: newContent } = await MySwal.fire({
+      title: 'Edit Answer',
+      html: (
+        <textarea
+          defaultValue={selected.content || ''}
+          style={{ width: '100%', minHeight: '100px' }}
+        />
+      ),
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Save Changes',
+      preConfirm: () => {
+        const content = document.querySelector('textarea').value;
+        if (!content) {
+          MySwal.showValidationMessage('The content cannot be empty');
+        }
+        return content;
+      },
     });
+
+    if (newContent) {
+      try {
+        await axios.put(`http://localhost:8080/api/questions/${questionId}/answers/${answerId}`, {
+          content: newContent,
+        }, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        MySwal.fire({
+          title: 'Updated!',
+          text: 'Your answer has been updated.',
+          icon: 'success',
+        });
+        fetchAnswers();
+      } catch (error) {
+        console.error('Error updating answer:', error);
+        MySwal.fire({
+          title: 'Error!',
+          text: 'Failed to update answer.',
+          icon: 'error',
+        });
+      }
+    }
   };
 
   const handleDeleteClick = async (answerId, questionId) => {
@@ -152,7 +188,7 @@ const AnswersPage = () => {
               Authorization: `Bearer ${accessToken}`,
             },
           });
-          setAnswers(answers.filter((answer) => answer.id !== answerId));
+          setAnswers(answers.filter(answer => answer.id !== answerId));
           MySwal.fire({
             title: 'Deleted!',
             text: 'Your answer has been deleted.',
@@ -191,10 +227,10 @@ const AnswersPage = () => {
     <div>
       <NewNavbar />
       <div style={{ display: 'flex' }}>
-        <Sidebar className="h-100" />
+        <Sidebar className='h-100' />
         <div style={{ flex: 1 }}>
           <div style={{ padding: '20px', marginTop: '100px' }}>
-            <DateInputsContainer>
+            <DateInputsContainer style={{ marginLeft: "25%" }}>
               <div>
                 <label htmlFor="startDate">Date de début :</label>
                 <input
@@ -206,7 +242,12 @@ const AnswersPage = () => {
               </div>
               <div>
                 <label htmlFor="endDate">Date de fin :</label>
-                <input type="date" id="endDate" value={endDate} onChange={handleEndDateChange} />
+                <input
+                  type="date"
+                  id="endDate"
+                  value={endDate}
+                  onChange={handleEndDateChange}
+                />
               </div>
             </DateInputsContainer>
             <p>Total des réponses : {answers.length}</p>
@@ -232,8 +273,12 @@ const AnswersPage = () => {
                   <span>{answer.responses ? answer.responses.length : 0} réponses</span>
                 </AnswerStat>
                 <AnswerTitleArea>
-                  <AnswerLink>{answer.content || 'No content'}</AnswerLink>
-                  <WhoAndWhen>répondue le {formatDate(answer.createdAt)}</WhoAndWhen>
+                  <AnswerLink>
+                    {answer.content || 'No content'}
+                  </AnswerLink>
+                  <WhoAndWhen>
+                    répondue le {formatDate(answer.createdAt)}
+                  </WhoAndWhen>
                 </AnswerTitleArea>
               </StyledAnswerRow>
             ))}

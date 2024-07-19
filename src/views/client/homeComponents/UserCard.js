@@ -1,13 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import '../homeComponents/UserCard.css';
 import { useNavigate } from 'react-router-dom';
-import { AiOutlineMessage } from 'react-icons/ai';
-import axios from 'axios';
+import { IoIosChatbubbles } from 'react-icons/io';
+import styled from 'styled-components';
 
-const UserCard = ({ id, username, email }) => {
+const Card = styled.div`
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin: 10px;
+  position: relative;
+  background: #fff;
+`;
+
+const ChatIcon = styled.div`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: grey;
+`;
+
+const UserCard = ({ id, username, email, score, onChatClick }) => {
   const navigate = useNavigate();
   const [userPoints, setUserPoints] = useState(null);
 
+  // Uncomment this block if you want to fetch user points from an API
+  /*
   useEffect(() => {
     const fetchReputationScore = async () => {
       try {
@@ -20,28 +40,28 @@ const UserCard = ({ id, username, email }) => {
 
     fetchReputationScore();
   }, [id]);
+  */
 
   const handleClick = () => {
     navigate(`/client/user?id=${id}`);
   };
 
   return (
-    <div onClick={handleClick} className="user-card">
+    <Card>
       <img
         src="https://bootdey.com/img/Content/avatar/avatar7.png"
         alt="User Image"
         className="user-image"
       />
       <div className="user-info">
-        <h2 className="username">{username}</h2>
+        <h2 className="username" onClick={handleClick}>{username}</h2>
         <p className="email">{email}</p>
         <p className="score">Score: {userPoints !== null ? userPoints : 'Loading...'}</p>
-        <AiOutlineMessage
-          onClick={handleClick}
-          style={{ cursor: 'pointer', fontSize: '24px', color: 'black' }}
-        />
+        <ChatIcon onClick={() => onChatClick(id,username)}> {/* Pass the user ID to onChatClick */}
+          <IoIosChatbubbles />
+        </ChatIcon>
       </div>
-    </div>
+    </Card>
   );
 };
 

@@ -141,7 +141,7 @@ const MesQuestionsFavorites = () => {
       <div style={{ display: 'flex' }}>
         <Sidebar className='h-100' />
         <div style={{ flex: 1 }}>
-          <Header2 />
+        <div style={{ padding: '20px' ,marginTop:"120px"}}>
           <p className='ms-2'>Total des questions Favoris : {questions.length}</p>
           {sortedQuestions.map((question, index) => (
             <StyledQuestionRow key={index}>
@@ -182,6 +182,7 @@ const MesQuestionsFavorites = () => {
           ))}
         </div>
       </div>
+    </div>
     </div>
   );
 };
