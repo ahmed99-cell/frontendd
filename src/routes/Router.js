@@ -18,6 +18,10 @@ import MesQuestions from 'src/views/client/homeComponents/Mesquestions';
 import MesQuestionsFavorites from 'src/views/client/MesQuestionsFavorits';
 import ChatBox from 'src/views/client/ChatBox';
 import ListQuestions from 'src/views/sample-page/ListQuestions';
+import SalesOverview from 'src/views/dashboard/components/Stat';
+import MonthlyEarnings from 'src/views/dashboard/components/MonthlyEarnings';
+import YearlyBreakup from 'src/views/dashboard/components/YearlyBreakup';
+import Stat from 'src/views/dashboard/components/Stat';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -50,6 +54,9 @@ const Router = [
       { path: '/modifierprofile', element: <ModifierProfile /> },
       { path: '/ajoutermoderateur', element: <AjouterModerateur /> },
       { path: '/listQuestions', exact: true, element: <ListQuestions /> },
+      { path: '/stat', exact: true, element: <Stat /> },
+      
+
 
       { path: '*', element: <Navigate to="/auth/404" /> },
     ],

@@ -6,6 +6,8 @@ import {
 import { IoIosPricetags } from "react-icons/io";
 import { BsQuestionOctagon } from "react-icons/bs";
 import { IoPersonAdd } from "react-icons/io5";
+import { IoStatsChart } from "react-icons/io5";
+
 
 
 import { FaUsersLine } from "react-icons/fa6";
@@ -46,6 +48,17 @@ const Menuitems = [
     icon: IoPersonAdd,
     href: '/ajoutermoderateur',
   },
+  {
+    navlabel: true,
+    subheader: 'Analytics',
+  },
+  {
+    id: uniqueId(),
+    title: 'Admin Stats',
+    icon: IoStatsChart,
+    href: '/stat',
+  },
+
   
   
 ];
