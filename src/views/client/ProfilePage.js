@@ -1,46 +1,31 @@
-import styled from 'styled-components';
-import { createGlobalStyle } from 'styled-components';
-import NewNavbar from './homeComponents/NewNavbar';
-import './UserProfile.css';
-import axios from 'axios';
 import { useEffect, useState } from 'react';
+import axios from 'axios';
+import styled from 'styled-components';
 import { useNavigate } from 'react-router';
 import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
+import NewNavbar from './homeComponents/NewNavbar';
+import './UserProfile.css';
+import { createGlobalStyle } from 'styled-components';
+import { MdOutlineInsertPhoto } from "react-icons/md";
+ 
 
 const GlobalStyle = createGlobalStyle`
 @import url('https://fonts.googleapis.com/css2?family=PlusJakartaSans:wght@300,400;700&display=swap');
 body{
-    Background: #FFF;
-    color : #000000;
-    font-family : Plus Jakarta Sans,sans-serif;
+    background: #FFF;
+    color: #000000;
+    font-family: 'Plus Jakarta Sans', sans-serif;
 }
-b,strong{
-    
-}
-a{
-    color : #fff;
-}
-p{
-    margin : 10px 0;
-    line-height: 1.5rem;
-}
-h1,h2{
-    margin-top:20px;
-    margin-bottom : 10px;
-}
-h1{
-    font-size: 1.8rem;
-}
-h2{
-    font-size: 1.6rem;
-}
-blockquote{
-    background-color : rgba(0,0,0,0.1);
-    padding : 15px;
-    border-radius : 4px;
-}
+b, strong{}
+a{color: #fff;}
+p{margin: 10px 0; line-height: 1.5rem;}
+h1, h2{margin-top: 20px; margin-bottom: 10px;}
+h1{font-size: 1.8rem;}
+h2{font-size: 1.6rem;}
+blockquote{background-color: rgba(0,0,0,0.1); padding: 15px; border-radius: 4px;}
 `;
+
 const Container = styled.div`
   padding: 70px 20px;
 `;
@@ -53,50 +38,71 @@ function ProfilePage() {
     email: '',
     username: '',
     password: '',
+    image: null,
   });
+  const [imagePreview, setImagePreview] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    const storedUserData = JSON.parse(localStorage.getItem('user')) || {
-      username: '',
-      email: '',
-      nom: '',
-      prenom: '',
-    };
-    setFormData(storedUserData);
+    const userId = JSON.parse(localStorage.getItem('user'))?.id;
+    if (userId) {
+      axios.get(`http://localhost:8080/api/user/${userId}`)
+        .then(response => {
+          const { prenom, nom, email, username, imageBase64 } = response.data;
+          setFormData(prev => ({
+            ...prev,
+            prenom,
+            nom,
+            email,
+            username,
+            image: null, // Reset image on fetch
+          }));
+          if (imageBase64) {
+            setImagePreview(`data:image/jpeg;base64,${imageBase64}`);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching user data:', error);
+        });
+    }
   }, []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormData((prevData) => ({
+    setFormData(prevData => ({
       ...prevData,
       [name]: value,
     }));
   };
 
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setFormData(prevData => ({
+        ...prevData,
+        image: file, // Store the File object for submission
+      }));
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+  
     const userData = JSON.parse(localStorage.getItem('user'));
     const accessToken = userData?.accessToken;
     const userId = userData?.id;
-
-    function getUserRole() {
-      const user = JSON.parse(localStorage.getItem('user')); // Assurez-vous que l'objet utilisateur est bien stocké en JSON
-      return user?.roles?.includes('ROLE_MODERATOR') ? 'moderator' : 'user';
-    }
-
-    if (!accessToken) {
-      console.error('Access token is missing from localStorage');
+  
+    if (!accessToken || !userId) {
+      console.error('Access token or User ID is missing from localStorage');
       return;
     }
-
-    if (!userId) {
-      console.error('User ID is missing from localStorage');
-      return;
-    }
-
+  
     if (
       !formData.prenom.trim() ||
       !formData.nom.trim() ||
@@ -106,38 +112,52 @@ function ProfilePage() {
       setErrorMessage('All fields are required');
       return;
     }
-
+  
     try {
-      const role = getUserRole();
-
-      // Ajoutez les rôles en fonction du rôle de l'utilisateur
-      const roles = role === 'mod' ? [{ name: 'ROLE_MODERATOR' }] : [{ name: 'ROLE_USER' }];
-
-      const response = await axios.put(
+      const role = JSON.parse(localStorage.getItem('user')).roles.includes('ROLE_MODERATOR') ? 'moderator' : 'user';
+      const roles = role === 'moderator' ? [{ name: 'ROLE_MODERATOR' }] : [{ name: 'ROLE_USER' }];
+  
+      const userToSend = {
+        prenom: formData.prenom,
+        nom: formData.nom,
+        email: formData.email,
+        username: formData.username,
+        roles,
+        ...(formData.password && { password: formData.password }),
+      };
+  
+      const formDataToSend = new FormData();
+      formDataToSend.append('user', JSON.stringify(userToSend));
+  
+      if (formData.image) {
+        formDataToSend.append('image', formData.image);
+      }
+  
+      await axios.put(
         `http://localhost:8080/api/user/${userId}`,
-        {
-          ...formData,
-          roles: roles, // Utilisez le rôle déterminé
-        },
+        formDataToSend,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'multipart/form-data',
           },
-        },
+        }
       );
-
-      setSuccessMessage('Profile updated successfully');
-      setErrorMessage('');
+  
+      // Logout the user
+      localStorage.removeItem('user');
+      localStorage.removeItem('accessToken');
+  
+      // Show success message and redirect to login page
       await Swal.fire({
         icon: 'success',
-        title: 'Success',
-        text: 'User-Profil updated successfully!',
+        title: 'Profile Updated',
+        text: 'Your profile has been updated successfully. You will be redirected to the login page to log in again.',
+        confirmButtonText: 'OK',
       });
-
-      // Exclure le mot de passe lors de la sauvegarde dans le local storage
-      const { password, ...userDataWithoutPassword } = formData;
-      localStorage.setItem('user', JSON.stringify(userDataWithoutPassword));
-      window.location.reload();
+  
+      navigate('/auth/login'); // Redirect to login page
+  
     } catch (error) {
       setErrorMessage('Error updating profile');
       await Swal.fire({
@@ -147,7 +167,7 @@ function ProfilePage() {
       });
     }
   };
-
+  
 
   return (
     <>
@@ -162,10 +182,25 @@ function ProfilePage() {
                   <div className="account-settings">
                     <div className="user-profile">
                       <div className="user-avatar">
-                        <img
-                          src="https://bootdey.com/img/Content/avatar/avatar7.png"
-                          alt="Maxwell Admin"
-                        />
+                        <div className="avatar-container">
+                          <img
+                            src={imagePreview || 'https://bootdey.com/img/Content/avatar/avatar7.png'}
+                            alt="User Avatar"
+                            className="avatar-image"
+                            style={{marginLeft:"75%"}}
+                          />
+                          <input
+                            type="file"
+                            className="file-input"
+                            id="image"
+                            name="image"
+                            onChange={handleImageChange}
+                          />
+                          <label htmlFor="image" className="file-label" >
+                            <span className="file-label-text">Change</span>
+                            <MdOutlineInsertPhoto />
+                          </label>
+                        </div>
                       </div>
                       <h5 className="user-name">{formData.username}</h5>
                       <h6 className="user-email">{formData.email}</h6>

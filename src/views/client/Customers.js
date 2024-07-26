@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import NewNavbar from './homeComponents/NewNavbar';
 import Sidebar from './homeComponents/sidebar';
@@ -8,6 +9,8 @@ import { TextField, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
 
 const Chatbox = styled.div`
   position: fixed;
@@ -91,57 +94,68 @@ const Customers = () => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isChatboxOpen, setIsChatboxOpen] = useState(false);
-  const [currentChatUserId, setCurrentChatUserId] = useState(null); // Store ID instead of username
+  const [currentChatUserId, setCurrentChatUserId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [currentChatUser, setCurrentChatUser] = useState(null);
   const [messageInput, setMessageInput] = useState('');
-  const [ws, setWs] = useState(null);
+  const [stompClient, setStompClient] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchUsers();
-
-    // Créer une connexion WebSocket
-    const socket = new WebSocket(`ws://localhost:8080/ws?token=${token}`);
-
-    socket.onopen = () => {
-      console.log('WebSocket connection opened');
-    };
-
-    socket.onmessage = (event) => {
-      console.log('Message received:', event.data);
-      const receivedMessage = JSON.parse(event.data);
-      setMessages((prevMessages) => [...prevMessages, receivedMessage]);
-    };
-
-    socket.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-
-    socket.onclose = () => {
-      console.log('WebSocket connection closed');
-    };
-
-    setWs(socket);
-
-    return () => {
-      socket.close();
-    };
-  }, [token]);
-
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get('http://localhost:8080/api/users', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    // Fetch users
+    axios
+      .get('http://localhost:8080/api/users')
+      .then((response) => {
+        const userDataString = localStorage.getItem('user');
+        if (userDataString) {
+          try {
+            const userData = JSON.parse(userDataString);
+            const filteredUsers = response.data.filter(
+              (user) => user.matricul !== parseInt(userData.id),
+            );
+            setUsers(filteredUsers);
+          } catch (error) {
+            console.error('Error parsing user data:', error);
+          }
+        } else {
+          setUsers(response.data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching users:', error);
       });
-      setUsers(response.data);
-    } catch (error) {
-      console.error('Error fetching users:', error.message);
-    }
-  };
 
+     
+        const socket = new SockJS('http://localhost:8080/ws');
+        const stompClient = new Client({
+          webSocketFactory: () => socket,
+          onConnect: (frame) => {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/user/queue/messages', (message) => {
+              if (message.body) {
+                const incomingMessage = JSON.parse(message.body);
+                setMessages((prevMessages) => [
+                  ...prevMessages,
+                  { ...incomingMessage, sender: 'Them' },
+                ]);
+              }
+            });
+          },
+          onStompError: (frame) => {
+            console.error('Error connecting to WebSocket:', frame);
+          },
+          reconnectDelay: 5000, // Reconnect every 5 seconds if disconnected
+        });
+      
+        stompClient.activate();
+        setStompClient(stompClient);
+      
+        return () => {
+          stompClient.deactivate();
+        };
+      }, []);
+      
+    
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
@@ -159,21 +173,32 @@ const Customers = () => {
   };
 
   const handleSendMessage = () => {
-    if (messageInput.trim() !== '' && ws && currentChatUserId) {
-      const message = {
-        content: messageInput,
-        senderId: senderId,
-        receiverId: currentChatUserId,
-      };
-
-      ws.send(JSON.stringify(message)); // Use ws.send instead of socket.emit
-      setMessages((prevMessages) => [...prevMessages, message]);
-      setMessageInput('');
+    if (messageInput.trim() !== '' && stompClient && currentChatUserId) {
+      if (stompClient.connected) {
+        const message = {
+          content: messageInput,
+          senderId: senderId,
+          receiverId: currentChatUserId,
+        };
+  
+        stompClient.publish({
+          destination: '/app/chat',
+          body: JSON.stringify(message),
+        });
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { content: messageInput, senderId: senderId, sender: 'You' },
+        ]);
+        setMessageInput('');
+      } else {
+        console.error('STOMP client is not connected.');
+      }
     }
   };
+  
 
   const filteredUsers = users.filter((user) =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase())
+    user.username.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -184,10 +209,25 @@ const Customers = () => {
         <div style={{ flex: 1 }}>
           <div style={{ marginTop: '13vh', zIndex: 1, backgroundColor: 'white' }}>
             <div className="main" style={{ marginTop: '10px' }}>
-              <h1 style={{ marginTop: '-20px', color: 'black', fontFamily: 'inherit', marginLeft: '30px' }}>
+              <h1
+                style={{
+                  color: 'black',
+                  fontFamily: 'inherit',
+                  marginLeft: '5%',
+                }}
+              >
                 Users
               </h1>
-              <div className="search-bar" style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px', marginTop: '-10px', marginLeft: '70%' }}>
+              <div
+                className="search-bar"
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  marginBottom: '20px',
+                  marginTop: '60px',
+                  marginLeft: '-57%',
+                }}
+              >
                 <TextField
                   type="text"
                   placeholder="Find a user"
@@ -202,17 +242,28 @@ const Customers = () => {
                       </InputAdornment>
                     ),
                   }}
-                  style={{ width: '200px', borderRadius: '4px' }}
+                  style={{
+                    marginTop: '10px',
+                    
+                    width: "350px",
+                    height: "40px",
+                    border: "1px",
+                    borderRadius: "30%",
+                    boxShadow: "0 6px 6px rgba(0, 0, 0, 0.1)",
+                    background: "#fff",
+                    transition: "all 0.3s ease",
+                  }}
                 />
               </div>
               <div className="mt-12 mb-4 user-cards-container">
                 {filteredUsers.map((user) => (
                   <UserCard
+                    imageBase64={user.imageBase64}
                     key={user.matricul}
                     id={user.matricul}
                     username={user.username}
                     email={user.email}
-                    score={'100'}
+                    reputation={user.reputation}
                     onChatClick={(id, username) => handleChatClick(id, username)}
                   />
                 ))}
@@ -230,7 +281,8 @@ const Customers = () => {
           <ChatBody>
             {messages.map((msg, index) => (
               <div key={index}>
-                <strong>{user.username}: </strong>{msg.content}
+                <strong>{msg.senderId === senderId ? 'You' : currentChatUser}: </strong>
+                {msg.content}
               </div>
             ))}
           </ChatBody>

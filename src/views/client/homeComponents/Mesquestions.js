@@ -87,6 +87,19 @@ const DateInputsContainer = styled.div`
   margin-bottom: 20px;
 `;
 
+const H2 = styled.h2`
+  margin-top: 10%;
+  font-size: 2em; /* Adjust the size as needed */
+  font-weight: bold;
+  color: #333; /* Darker color for better readability */
+  text-align: center; /* Center the heading */
+  font-family: 'Arial', sans-serif; /* Change the font family as needed */
+  text-transform: uppercase; /* Optional: Transform text to uppercase */
+  letter-spacing: 1px; /* Optional: Add space between letters */
+  padding-bottom: 10px; /* Optional: Add some padding below */
+  border-bottom: 2px solid #ddd; /* Optional: Add a bottom border for a more defined look */
+`;
+
 const MesQuestions = () => {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -193,9 +206,9 @@ const MesQuestions = () => {
       <div style={{ display: 'flex' }}>
         <Sidebar className='h-100' />
         <div style={{ flex: 1 }}>
-        
-          <div style={{ padding: '20px' ,marginTop:"100px"}}>
-            <DateInputsContainer>
+        <H2>my questions </H2>
+          <div style={{ padding: '20px' ,marginTop:"10px"}}>
+            <DateInputsContainer style={{ marginLeft: "25%" }}> 
               <div>
                 <label htmlFor="startDate">Date de début :</label>
                 <input
@@ -214,7 +227,7 @@ const MesQuestions = () => {
                   onChange={handleEndDateChange}
                 />
               </div>
-            </DateInputsContainer>
+            </DateInputsContainer >
             <p>Total des questions : {questions.length}</p>
             {sortedQuestions.map((question, index) => (
               <StyledQuestionRow key={index} onClick={() => handleQuestionClick(question.id)}>

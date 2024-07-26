@@ -9,41 +9,39 @@ import {
   TableRow,
   Chip,
   IconButton,
+  TextField,
+  Button,
 } from '@mui/material';
 import DashboardCard from '../../../components/shared/DashboardCard';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
 import { useNavigate } from 'react-router';
-import { Label } from '@mui/icons-material';
+import Swal from 'sweetalert2';
 
 const ListUsers = () => {
-  const navigate = useNavigate(); // Get the navigate function from react-router-dom
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
+  const [filterNom, setFilterNom] = useState('');
+  const [filterPrenom, setFilterPrenom] = useState('');
+  const [sortOrderNom, setSortOrderNom] = useState('asc');
+  const [sortOrderPrenom, setSortOrderPrenom] = useState('asc');
 
   useEffect(() => {
     axios
       .get('http://localhost:8080/api/users')
       .then((response) => {
-        // Récupérer l'utilisateur connecté depuis localStorage
         const userDataString = localStorage.getItem('user');
         if (userDataString) {
           try {
             const userData = JSON.parse(userDataString);
-
-            // Utiliser le champ "matricule"
-
-            // Filtrer les utilisateurs pour exclure l'utilisateur connecté
             const filteredUsers = response.data.filter(
               (user) => user.matricul !== parseInt(userData.id),
-            ); // Utiliser "matricule" au lieu de "id"
-            console.log(filteredUsers);
-            // Mettre à jour l'état avec les utilisateurs filtrés
+            );
             setUsers(filteredUsers);
           } catch (error) {
             console.error('Erreur lors de la conversion des données utilisateur :', error);
           }
         } else {
-          // Si aucune donnée utilisateur n'est présente dans localStorage, utiliser les données brutes de l'API
           setUsers(response.data);
         }
       })
@@ -52,63 +50,140 @@ const ListUsers = () => {
       });
   }, []);
 
-  const handleDeleteUser = (userId) => {
-    const confirmed = window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');
-    if (!confirmed) {
-      return; // Annuler la suppression si l'utilisateur clique sur "Annuler"
-    }
+  const handleDeleteUser = async (userId) => {
+    try {
+      const result = await Swal.fire({
+        title: 'Êtes-vous sûr ?',
+        text: 'Cette action est irréversible !',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Oui, supprimer',
+        cancelButtonText: 'Annuler',
+      });
 
-    console.log("Suppression de l'utilisateur avec ID :", userId);
-    // Envoyez une requête HTTP DELETE vers votre API backend pour supprimer l'utilisateur
-    axios
-      .delete(`http://localhost:8080/api/user/${userId}`)
-      .then((response) => {
-        alert('Utilisateur supprimé avec succès !');
-        window.location.reload();
-
-        // Mettez à jour l'état local des utilisateurs en supprimant l'utilisateur supprimé
+      if (result.isConfirmed) {
+        await axios.delete(`http://localhost:8080/api/user/${userId}`);
+        await Swal.fire({
+          icon: 'success',
+          title: 'Utilisateur supprimé',
+          text: "L'utilisateur a été supprimé avec succès.",
+          confirmButtonText: 'OK',
+        });
         setUsers((prevUsers) => prevUsers.filter((user) => user.matricule !== userId));
-      })
-      .catch((error) => {
-        console.error("Erreur lors de la suppression de l'utilisateur :", error);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la suppression de l'utilisateur :", error);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Erreur',
+        text: "Une erreur est survenue lors de la suppression de l'utilisateur. Veuillez réessayer.",
+        confirmButtonText: 'OK',
       });
+    }
   };
 
-  const handleRoleEdit = (userId, newRole) => {
-    // Make an API call to update the user role
-    axios
-      .put(`http://localhost:8080/api/${userId}/role`, { newRoleName: newRole })
-      .then((response) => {
-        console.log(response);
-        // Update the user role in the state
-        setUsers((prevUsers) =>
-          prevUsers.map((user) => {
-            if (user.matricul === userId) {
-              return { ...user, roles: [newRole] };
-            }
-            return user;
-          })
-        );
-        alert('User role updated successfully!');
-      })
-      .catch((error) => {
-        console.error('Error updating user role:', error);
+  const handleRoleEdit = async (userId, newRole) => {
+    try {
+      const response = await axios.put(`http://localhost:8080/api/${userId}/role`, {
+        newRoleName: newRole,
       });
+      setUsers((prevUsers) =>
+        prevUsers.map((user) => {
+          if (user.matricul === userId) {
+            return { ...user, roles: [newRole] };
+          }
+          return user;
+        }),
+      );
+      await Swal.fire({
+        icon: 'success',
+        title: 'Rôle mis à jour',
+        text: "Le rôle de l'utilisateur a été mis à jour avec succès.",
+        confirmButtonText: 'OK',
+      });
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du rôle de l'utilisateur :", error);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Erreur',
+        text: 'Une erreur est survenue lors de la mise à jour du rôle. Veuillez réessayer.',
+        confirmButtonText: 'OK',
+      });
+    }
   };
-  
-  const handleRoleClick = (userId, currentRole) => {
-    const newRole = prompt('Enter the new role:');
-    if (newRole !== null && newRole !== '') {
+
+  const handleRoleClick = async (userId, currentRole) => {
+    const { value: newRole } = await Swal.fire({
+      title: 'Modifier le rôle',
+      input: 'text',
+      inputLabel: 'Entrez le nouveau rôle',
+      inputValue: currentRole,
+      showCancelButton: true,
+      confirmButtonText: 'Sauvegarder',
+      cancelButtonText: 'Annuler',
+    });
+
+    if (newRole) {
       handleRoleEdit(userId, newRole);
     }
   };
 
+  const handleSortNom = () => {
+    const sortedUsers = [...users].sort((a, b) => {
+      if (sortOrderNom === 'asc') {
+        return a.nom.localeCompare(b.nom);
+      } else {
+        return b.nom.localeCompare(a.nom);
+      }
+    });
+    setUsers(sortedUsers);
+    setSortOrderNom(sortOrderNom === 'asc' ? 'desc' : 'asc');
+  };
+
+  const handleSortPrenom = () => {
+    const sortedUsers = [...users].sort((a, b) => {
+      if (sortOrderPrenom === 'asc') {
+        return a.prenom.localeCompare(b.prenom);
+      } else {
+        return b.prenom.localeCompare(a.prenom);
+      }
+    });
+    setUsers(sortedUsers);
+    setSortOrderPrenom(sortOrderPrenom === 'asc' ? 'desc' : 'asc');
+  };
+
+  const filteredUsers = users.filter(
+    (user) =>
+      user.nom.toLowerCase().includes(filterNom.toLowerCase()) &&
+      user.prenom.toLowerCase().includes(filterPrenom.toLowerCase()),
+  );
+
   return (
     <DashboardCard title="User List">
       <Box sx={{ overflow: 'auto', width: { xs: '280px', sm: 'auto' } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 , mt:"10px"}}>
+          <TextField
+            label="Filter by Nom"
+            variant="outlined"
+            value={filterNom}
+            onChange={(e) => setFilterNom(e.target.value)}
+            sx={{ mr: 2 }}
+          />
+
+          <Button variant="contained" onClick={handleSortNom}>
+            Sort by Nom ({sortOrderNom === 'asc' ? 'Desc' : 'Asc'})
+          </Button>
+        </Box>
         <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap', mt: 2 }}>
           <TableHead>
             <TableRow>
+              <TableCell>
+                <Typography variant="subtitle2" fontWeight={600}>
+                  Image
+                </Typography>
+              </TableCell>
               <TableCell>
                 <Typography variant="subtitle2" fontWeight={600}>
                   Matricule
@@ -138,8 +213,19 @@ const ListUsers = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
               <TableRow key={user.matricul}>
+                <TableCell>
+                  {user.imageBase64 ? (
+                    <img
+                      src={`data:image/jpeg;base64,${user.imageBase64}`}
+                      alt="User"
+                      style={{ width: 50, height: 50, borderRadius: '50%' }}
+                    />
+                  ) : (
+                    <Typography variant="subtitle2">No Image</Typography>
+                  )}
+                </TableCell>
                 <TableCell>
                   <Typography variant="subtitle2" fontWeight={600}>
                     {user.matricul}
@@ -160,12 +246,14 @@ const ListUsers = () => {
                 </TableCell>
                 <TableCell>
                   {user.roles &&
-                    user.roles.map((role) => {
-                      console.log('Role name:', role); // Vérifiez les noms de rôles
-                      return <Chip key={role.id} label={role} onClick={()=> handleRoleClick(user.matricul,role)}/>;
-                    })}
+                    user.roles.map((role) => (
+                      <Chip
+                        key={role}
+                        label={role}
+                        onClick={() => handleRoleClick(user.matricul, role)}
+                      />
+                    ))}
                 </TableCell>
-
                 <TableCell align="right">
                   <IconButton onClick={() => handleDeleteUser(user.matricul)}>
                     <DeleteIcon />
@@ -176,7 +264,7 @@ const ListUsers = () => {
           </TableBody>
         </Table>
         <h1 style={{ marginTop: '30px', fontSize: '14px', marginRight: '50px' }}>
-          you can change role by clicking of it*(ROLE_MODERATOR OR ROLE_USER OR ROLE_ADMIN)
+          You can change the role by clicking on it *(ROLE_MODERATOR OR ROLE_USER OR ROLE_ADMIN)
         </h1>
       </Box>
     </DashboardCard>

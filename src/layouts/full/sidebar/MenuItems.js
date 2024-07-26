@@ -1,7 +1,14 @@
 import {
    IconLayoutDashboard,
    IconAperture
+   
 } from '@tabler/icons';
+import { IoIosPricetags } from "react-icons/io";
+import { BsQuestionOctagon } from "react-icons/bs";
+import { IoPersonAdd } from "react-icons/io5";
+
+
+import { FaUsersLine } from "react-icons/fa6";
 
 import { uniqueId } from 'lodash';
 
@@ -14,14 +21,20 @@ const Menuitems = [
   {
     id: uniqueId(),
     title: 'List of Users',
-    icon: IconLayoutDashboard,
+    icon: FaUsersLine,
     href: '/dashboard',
   },
   {
     id: uniqueId(),
     title: 'Liste of Tags',
-    icon: IconAperture,
+    icon: IoIosPricetags,
     href: '/listoftags',
+  },
+  {
+    id: uniqueId(),
+    title: 'Liste of Questions',
+    icon: BsQuestionOctagon,
+    href: '/listQuestions',
   },
   {
     navlabel: true,
@@ -30,7 +43,7 @@ const Menuitems = [
   {
     id: uniqueId(),
     title: 'Ajouter Moderateur',
-    icon: IconAperture,
+    icon: IoPersonAdd,
     href: '/ajoutermoderateur',
   },
   

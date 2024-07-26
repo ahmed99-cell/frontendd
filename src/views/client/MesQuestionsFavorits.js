@@ -78,7 +78,18 @@ const FavoriteIcon = styled.div`
     color: gold;
   }
 `;
-
+const H2 = styled.h2`
+  margin-top: 10%;
+  font-size: 2em; /* Adjust the size as needed */
+  font-weight: bold;
+  color: #333; /* Darker color for better readability */
+  text-align: center; /* Center the heading */
+  font-family: 'Arial', sans-serif; /* Change the font family as needed */
+  text-transform: uppercase; /* Optional: Transform text to uppercase */
+  letter-spacing: 1px; /* Optional: Add space between letters */
+  padding-bottom: 10px; /* Optional: Add some padding below */
+  border-bottom: 2px solid #ddd; /* Optional: Add a bottom border for a more defined look */
+`;
 const formatDate = (dateString) => {
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
   return new Date(dateString).toLocaleDateString(undefined, options);
@@ -141,7 +152,8 @@ const MesQuestionsFavorites = () => {
       <div style={{ display: 'flex' }}>
         <Sidebar className='h-100' />
         <div style={{ flex: 1 }}>
-        <div style={{ padding: '20px' ,marginTop:"120px"}}>
+          <H2>My Favorite Question </H2>
+        <div style={{ padding: '20px' ,marginTop:"60px"}}>
           <p className='ms-2'>Total des questions Favoris : {questions.length}</p>
           {sortedQuestions.map((question, index) => (
             <StyledQuestionRow key={index}>

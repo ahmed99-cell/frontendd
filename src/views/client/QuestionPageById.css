@@ -7,8 +7,9 @@ textarea {
   border: 1px solid #ccc;
 }
 
-button, input[type="submit"] {
-  background-color: #007BFF;
+button,
+input[type='submit'] {
+  background-color: #007bff;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -19,23 +20,25 @@ button, input[type="submit"] {
   transition: background 0.2s ease;
 }
 
-button:hover, input[type="submit"]:hover {
+button:hover,
+input[type='submit']:hover {
   background-color: #0056b3;
 }
 
 blockquote {
-  background-color: rgba(0,0,0,0.1);
+  background-color: rgba(0, 0, 0, 0.1);
   padding: 15px;
   border-radius: 4px;
 }
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  background: #FFF;
+  background: #fff;
   color: #000000;
 }
 
-b, strong {
+b,
+strong {
   font-weight: bold;
 }
 
@@ -65,7 +68,6 @@ p {
 .blog-meta .author,
 .blog-meta .date {
   margin-right: 15px;
-  
 }
 
 .blog-meta .author i,
@@ -82,17 +84,17 @@ p {
   font-style: italic;
 }
 
-.title{
+.title {
   font-size: 24px;
-    font-weight: 600;
-    line-height: 1.4;
-    margin-bottom: 30px;
-    color: #000000;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 30px;
+  color: #000000;
 }
-.content{
+.content {
   font-size: 15px;
-    line-height: 1.6;
-    color: #051922;
+  line-height: 1.6;
+  color: #051922;
 }
 
 .tags .tag-container {
@@ -108,8 +110,6 @@ p {
   margin-right: 10px; /* Espacement entre les tags */
   margin-bottom: 10px; /* Espacement en bas des tags */
 }
-
-
 
 .cadre {
   border: 1px solid #ccc;
@@ -138,7 +138,7 @@ img {
   background: rgba(0, 0, 0, 0.8);
   justify-content: center;
   align-items: center;
-  
+
   z-index: 1000;
 }
 
@@ -146,4 +146,13 @@ img {
   max-width: 90%;
   max-height: 90%;
 }
+/* QuestionsPageById.css */
+.answer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px; /* Space between answers */
+}
 
+.answer .content {
+  margin-left: 10px; /* Space between avatar and answer content */
+}

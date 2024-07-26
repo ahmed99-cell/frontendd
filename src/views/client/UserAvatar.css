@@ -1,0 +1,20 @@
+
+.user-avatar {
+    display: flex;
+    align-items: center;
+    margin-bottom: -65px;
+  }
+  
+  .user-avatar img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+     
+  }
+  
+  .user-avatar .user-icon {
+    font-family: 'monospace';
+    margin-left: 0; /* Reset margin-left for default icon */
+    margin-right: 10px; /* Space between icon and username */
+  }
+  

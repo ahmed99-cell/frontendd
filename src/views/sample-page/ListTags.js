@@ -1,22 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Typography } from '@mui/material';
+import { Typography, Box, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button } from '@mui/material';
 import axios from 'axios';
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
-import {
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Chip,
-  IconButton,
-} from '@mui/material';
 
 const ListTags = () => {
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('');
+  const [sortOrder, setSortOrder] = useState('asc'); // asc or desc
 
   useEffect(() => {
     fetchData();
@@ -32,10 +24,38 @@ const ListTags = () => {
       setLoading(false);
     }
   };
+
+  const handleSort = () => {
+    const sortedTags = [...tags].sort((a, b) => {
+      if (sortOrder === 'asc') {
+        return a.name.localeCompare(b.name);
+      } else {
+        return b.name.localeCompare(a.name);
+      }
+    });
+    setTags(sortedTags);
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+  };
+
+  const filteredTags = tags.filter((tag) =>
+    tag.name.toLowerCase().includes(filter.toLowerCase())
+  );
+
   return (
-    <PageContainer title="Liste of Tags" description="Liste of Tags">
-      <DashboardCard title="Liste of Tags">
+    <PageContainer title="List of Tags" description="List of Tags">
+      <DashboardCard title="List of Tags">
         <Box sx={{ overflow: 'auto', width: { xs: '280px', sm: 'auto' } }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2,mt:"10px" }}>
+            <TextField
+              label="Filter by title"
+              variant="outlined"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+            <Button variant="contained" onClick={handleSort}>
+              Sort by Title ({sortOrder === 'asc' ? 'Desc' : 'Asc'})
+            </Button>
+          </Box>
           <Table aria-label="simple table" sx={{ whiteSpace: 'nowrap', mt: 2 }}>
             <TableHead>
               <TableRow>
@@ -57,7 +77,7 @@ const ListTags = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {tags.map((tag) => (
+              {filteredTags.map((tag) => (
                 <TableRow key={tag.id}>
                   <TableCell>
                     <Typography variant="subtitle2" fontWeight={600}>

@@ -15,6 +15,7 @@ import Darkmode from 'darkmode-js';
 import { icon } from '@fortawesome/fontawesome-svg-core';
 import '../homeComponents/QuestionsPage.css';
 import { useTranslation } from 'react-i18next';
+import { faTrashAlt } from '@fortawesome/free-solid-svg-icons'
 import { Margin } from '@mui/icons-material';
 const QuestionStat = styled.div`
   text-align: center;
@@ -136,6 +137,7 @@ const QuestionsPage = () => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [mode, setMode] = useState('light'); // Default mode is light
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isModerator, setIsModerator] = useState(false); 
   
 
   const formatDate = (dateString) => {
@@ -154,6 +156,46 @@ const QuestionsPage = () => {
   };
 
   const votreToken = localStorage.getItem('token');
+
+  useEffect(() => {
+    const fetchUserRoles = async () => {
+      try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user && user.roles !== null) {
+          const userRoles = user.roles;
+          if (userRoles.includes("ROLE_MODERATOR")) {
+            setIsModerator(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user roles:', error.message);
+      }
+    };
+
+    fetchUserRoles(); 
+  }, []); 
+
+  const handleTrashClick = async (questionId) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'You won\'t be able to revert this!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(`http://localhost:8080/api/questions/${questionId}`);
+        fetchAllQuestions();
+        Swal.fire('Deleted!', 'Your question has been deleted.', 'success');
+      } catch (error) {
+        Swal.fire('Error!', 'There was an error deleting your question.', 'error');
+      }
+    }
+  };
 
   
 
@@ -522,7 +564,7 @@ useEffect(() => {
               currentPosts.map((question, index) => (
                 <StyledQuestionRow key={index}>
                   <QuestionStat>
-                    {(!question.answers && typeof question.voteCount === 'number') ? question.voteCount : !question.answers ? 0 : ''}
+                    {(!question.answers && typeof question.voteCount === 'number') ? question.voteCount : !question.votes ? 0 : ''}
                     {question.votes && question.votes.length}
                     <span>{t('votes')}</span>
                   </QuestionStat>
@@ -572,6 +614,15 @@ useEffect(() => {
                   >
                     <FontAwesomeIcon icon={faStar} />
                   </div>
+                  {isModerator && (
+                    <div>
+                    <FontAwesomeIcon
+                      icon={faTrashAlt}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleTrashClick(question.id)}
+                    />
+                  </div>
+                  )}
                 </StyledQuestionRow>
               ))}
   

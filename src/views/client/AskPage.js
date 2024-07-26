@@ -45,27 +45,25 @@ const AskPage = () => {
   useEffect(() => {
     if (question) {
       setExistingImage(question.image);
-      setSelectedTags(question.tags.map((tag) => ({ value: tag.id, label: tag.name })));
+      setSelectedTags(question.tags.map((tag) => ({ value: tag.id, label: tag.name})));
       console.log(question.tags)
     }
   }, [question]);
  
   const handleSubmit = async (event) => {
-    event.preventDefault(); // Prevent the form from submitting normally
+    event.preventDefault(); 
  
-    // Retrieve the authentication token from localStorage
- 
-    // Check if the token is present
+  
     if (!votreToken) {
       alert('Please log in to ask a question.');
-      navigate('/auth/login'); // Redirect to the login page
+      navigate('/auth/login'); 
       return;
     }
  
-    // Create a headers object with the authentication token
+    
     const headers = {
       'Content-Type': 'multipart/form-data',
-      Authorization: `Bearer ${votreToken}`, // Include the token in the Authorization header
+      Authorization: `Bearer ${votreToken}`, 
     };
  
     const formData = new FormData();
@@ -89,7 +87,7 @@ const AskPage = () => {
             text: 'Question updated successfully!',
           });
  
-          navigate('/client/questionpage'); // Redirect to home page or wherever you want
+          navigate('/client/questionpage'); 
         }
       } catch (error) {
         console.error('Error:', error);
@@ -100,7 +98,7 @@ const AskPage = () => {
         });
       }
     } else {
-      // Create new question
+      
       try {
         const response = await axios.post('http://localhost:8080/api/questions/create', formData, {
           headers: headers, // Pass the headers object to Axios
@@ -112,7 +110,7 @@ const AskPage = () => {
             text: 'Question created successfully!',
           });
  
-          navigate('/client/questionpage'); // Redirect to home page or wherever you want
+          navigate('/client/questionpage'); 
         }
       } catch (error) {
         console.error('Error:', error);
@@ -207,7 +205,7 @@ const AskPage = () => {
                   <Select
                     value={selectedTags}
                     onChange={handleTagChange}
-                    options={tags.map((tag) => ({ value: tag.id, label: tag.name }))}
+                    options={tags.map((tag) => ({ value: tag.id, label: tag.name}))}
                     isMulti={true}
                     placeholder="Select tags"
                   />

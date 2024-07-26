@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router';
+import Swal from 'sweetalert2';
 
 const AuthResetPassword = ({ subtext }) => {
     
@@ -14,33 +15,50 @@ const AuthResetPassword = ({ subtext }) => {
     
        
 
-  const handleReset = async (event) => {
-    event.preventDefault();
-
-    try {
-      // Envoyer les données du formulaire au backend pour réinitialiser le mot de passe
-      await axios.post('http://localhost:8080/api/auth/reset-password', {
-        email: email,
-        oldPassword: oldPassword,
-        newPassword: newPassword,
-      });
-
-      // Réinitialisation réussie, naviguer vers la page de connexion
-      alert('changement de mot de passe a reussi');
-      navigate('/auth/login');
-    } catch (error) {
-      // Gérer les erreurs
-      if (error.response && error.response.data.error) {
-        setError(error.response.data.error); // Afficher l'erreur renvoyée par l'API
-      } else {
-        console.error('Erreur lors de la réinitialisation du mot de passe :', error);
-        setError(
-          'Une erreur est survenue lors de la réinitialisation du mot de passe. Veuillez réessayer.',
-        );
-      }
-    }
-  };
-
+        const handleReset = async (event) => {
+          event.preventDefault();
+      
+          try {
+              // Attempt to send the reset password request
+              await axios.post('http://localhost:8080/api/auth/reset-password', {
+                  email: email,
+                  oldPassword: oldPassword,
+                  newPassword: newPassword,
+              });
+      
+              // Show success message with SweetAlert2
+              await Swal.fire({
+                  icon: 'success',
+                  title: 'Mot de passe réinitialisé !',
+                  text: 'Votre mot de passe a été changé avec succès.',
+                  confirmButtonText: 'OK'
+              });
+      
+              // Redirect to login page
+              navigate('/auth/login');
+          } catch (error) {
+              // Error handling
+              if (error.response && error.response.data.error) {
+                  // Show specific error message from response
+                  await Swal.fire({
+                      icon: 'error',
+                      title: 'Erreur',
+                      text: error.response.data.error,
+                      confirmButtonText: 'OK'
+                  });
+              } else {
+                  // Log and show generic error message
+                  console.error('Erreur lors de la réinitialisation du mot de passe :', error);
+      
+                  await Swal.fire({
+                      icon: 'error',
+                      title: 'Erreur',
+                      text: 'Une erreur est survenue lors de la réinitialisation du mot de passe. Veuillez réessayer.',
+                      confirmButtonText: 'OK'
+                  });
+              }
+          }
+      };
   return (
     <Box component="form" onSubmit={handleReset} mt={2}>
       <Typography variant="subtitle1" textAlign="center" color="textSecondary" mb={1}>

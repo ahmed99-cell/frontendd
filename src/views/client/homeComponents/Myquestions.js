@@ -4,9 +4,10 @@ import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import styled from 'styled-components';
 import NewNavbar from './NewNavbar';
 import Sidebar from './sidebar';
-import { FaUserCircle } from 'react-icons/fa';
 import { useLocation } from 'react-router-dom';
+import { SlBadge } from 'react-icons/sl'; // Import SlBadge icon
 
+// Styled components
 const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -27,17 +28,59 @@ const ProfileSection = styled.div`
   display: flex;
   align-items: center;
   margin-top: 60px;
+  gap: 20px; // Space between profile info and badges
 `;
 
 const ProfileIcon = styled.div`
-  font-size: 80px;
-  color: #8884d8;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 20px;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 `;
 
 const UserInfo = styled.div`
   display: flex;
   flex-direction: column;
-  margin-left: 20px;
+  align-items: flex-start;
+  gap: 10px;
+  padding-top:30px;
+  font-family: 'Arial', sans-serif;
+  color: #333;
+`;
+
+const UserInfoTitle = styled.p`
+  font-size: 18px;
+  font-weight: bold;
+  
+  margin: 0;
+`;
+
+const UserInfoDetail = styled.p`
+  font-size: 16px;
+  margin: 0;
+  color: #555;
+`;
+
+const BadgeSection = styled.div`
+  display: flex;
+  align-items: right;
+  flex-direction: column; // Stack badges vertically
+  gap: 10px; // Space between badges
+`;
+
+const Badge = styled(SlBadge)`
+  font-size: 50px;
+  color: ${props => props.active ? props.color : 'transparent'}; // Badge color based on status
+  transition: color 0.3s ease;
+  margin-top :5px;
+  padding-bottom:15px
 `;
 
 const ChartsContainer = styled.div`
@@ -65,7 +108,7 @@ const truncateText = (text, maxLength) => {
   return text.substring(0, maxLength) + '...';
 };
 
-const CustomTooltip = ({ active, payload, label }) => {
+const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     return (
       <div style={{ backgroundColor: '#fff', border: '1px solid #ccc', padding: '10px' }}>
@@ -74,7 +117,6 @@ const CustomTooltip = ({ active, payload, label }) => {
       </div>
     );
   }
-
   return null;
 };
 
@@ -88,21 +130,18 @@ const ChartComponent = () => {
   const [userSince, setUserSince] = useState('');
   const [userName, setUserName] = useState('');
   const [userPoints, setUserPoints] = useState(0);
+  const [userImage, setUserImage] = useState('');
 
   useEffect(() => {
     if (id) {
-      console.log(id)
       const fetchData = async () => {
         try {
           // Fetch user info
           const userResponse = await axios.get(`http://localhost:8080/api/user/${id}`);
           setUserName(userResponse.data.username);
+          setUserPoints(userResponse.data.reputation.score);
+          setUserImage(userResponse.data.imageBase64 || ''); // Set fallback to empty string
 
-          // Fetch reputation info
-          const reputationResponse = await axios.get(`http://localhost:8080/api/reputations/${id}`);
-          setUserPoints(reputationResponse.data.score);
-
-          
           const questionsResponse = await axios.get('http://localhost:8080/api/questions/by-user-and-date', {
             params: {
               userId: id,
@@ -120,12 +159,10 @@ const ChartComponent = () => {
           });
 
           setQuestions(questionsResponse.data);
-          console.log(questionsResponse.data)
           setAnswers(answersResponse.data);
           processQuestionChartData(questionsResponse.data);
           processAnswerChartData(answersResponse.data);
 
-          
           if (questionsResponse.data.length > 0) {
             setUserSince(questionsResponse.data[0].createdAt);
           } else {
@@ -158,6 +195,8 @@ const ChartComponent = () => {
       value: tagCount[tag]
     }));
 
+    console.log('Question Chart Data:', formattedData);
+
     setQuestionChartData(formattedData);
   };
 
@@ -166,14 +205,18 @@ const ChartComponent = () => {
 
     data.forEach(answer => {
       const responsesCount = answer.responses ? answer.responses.length : 0;
-      answerCount[answer.content] = responsesCount;
+      answerCount[answer.content] = (answerCount[answer.content] || 0) + responsesCount;
     });
 
-    const formattedData = Object.keys(answerCount).map(content => ({
-      name: truncateText(content, 20),
-      value: answerCount[content],
-      fullContent: content
-    }));
+    const formattedData = Object.keys(answerCount)
+      .filter(content => answerCount[content] > 0)
+      .map(content => ({
+        name: truncateText(content, 20),
+        value: answerCount[content],
+        fullContent: content
+      }));
+
+    console.log('Answer Chart Data:', formattedData);
 
     setAnswerChartData(formattedData);
   };
@@ -189,6 +232,17 @@ const ChartComponent = () => {
     return date.toLocaleDateString('en-US', options);
   };
 
+  // Determine badge state based on points
+  const getBadgeState = (points) => {
+    return {
+      bronze: points >= 50,
+      silver: points >= 100,
+      gold: points >= 150
+    };
+  };
+
+  const badges = getBadgeState(userPoints);
+
   return (
     <PageContainer>
       <NewNavbar />
@@ -197,13 +251,23 @@ const ChartComponent = () => {
         <MainContent>
           <ProfileSection>
             <ProfileIcon>
-              <FaUserCircle />
+              <img 
+                src={userImage ? `data:image/jpeg;base64,${userImage}` : 'https://bootdey.com/img/Content/avatar/avatar7.png'} 
+                alt="User Profile"
+              />
             </ProfileIcon>
-            <UserInfo>
-              <p>{userName}</p>
-              <p>User since: {userSince !== 'No questions created yet' ? formatDate(userSince) : userSince}</p>
-              <p>Points: {userPoints}</p>
-            </UserInfo>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <UserInfo>
+                <UserInfoTitle>{userName}</UserInfoTitle>
+                <UserInfoDetail>User since: {userSince !== 'No questions created yet' ? formatDate(userSince) : userSince}</UserInfoDetail>
+                <UserInfoDetail>Points: {userPoints}</UserInfoDetail>
+              </UserInfo>
+              <BadgeSection>
+                {badges.gold && <Badge as={SlBadge} color="#ffd700" />}
+                {badges.silver && !badges.gold && <Badge as={SlBadge} color="#c0c0c0" />}
+                {badges.bronze && !badges.silver && !badges.gold && <Badge as={SlBadge} color="#cd7f32" />}
+              </BadgeSection>
+            </div>
           </ProfileSection>
           <HorizontalLine />
           <ChartsContainer>

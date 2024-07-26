@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './sidebar.css';
 import { BsEscape, BsTagFill, BsStar, BsPerson, BsTag, BsQuestionCircle } from 'react-icons/bs';
 import { useTranslation } from 'react-i18next';
+import { useLocation, Link } from 'react-router-dom';
 
 const SidebarOption = ({ title, children }) => {
   return (
@@ -17,6 +18,7 @@ const SidebarOption = ({ title, children }) => {
 const Sidebar = () => {
   const { t } = useTranslation();
   const [sidebarHeight, setSidebarHeight] = useState('auto');
+  const location = useLocation();
 
   useEffect(() => {
     const checkPageHeight = () => {
@@ -36,46 +38,59 @@ const Sidebar = () => {
     };
   }, []);
 
+  const getLinkStyle = (path) => {
+    return location.pathname === path
+      ? { backgroundColor: '#bc1434', color: '#bc1434', borderRadius: '10px' }
+      : { color: '#000' };
+  };
+
   return (
     <div className="">
-      <div style={{ height: sidebarHeight, minHeight: '110%', backgroundColor: '#f0f0f0', width: '250px' }}>
+      <div
+        style={{
+          height: sidebarHeight,
+          minHeight: '110%',
+          backgroundColor: '#f0f0f0',
+          width: '250px',
+        }}
+      >
         <div
           className="d-flex flex-column flex-shrink-0 p-3 bg-light"
-          style={{ width: '250px', height: '100%', boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)" }}
+          style={{ width: '250px', height: '100%', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)' }}
         >
-          <a
-            href="/"
+          <Link
+            to="/"
             className="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none"
           >
             <svg className="bi me-2" width={40} height={32}>
               <use xlinkHref="#bootstrap" />
             </svg>
-          </a>
+          </Link>
           <hr />
           <ul className="nav nav-pills flex-column mb-auto pt-3">
             <li>
-              <a href="/client/questionpage" className="nav-link link-dark">
+              <Link to="/client/questionpage" className="nav-link link-dark" style={getLinkStyle('/client/questionpage')}>
                 <BsQuestionCircle className="me-2" style={{ fontSize: '1.5rem' }} />
                 {t('Question')}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/client/tags" className="nav-link link-dark">
+              <Link to="/client/tags" className="nav-link link-dark" style={getLinkStyle('/client/tags')}>
                 <BsTag className="me-2" style={{ fontSize: '1.5rem' }} />
                 {t('Tags')}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/client/Customers" className="nav-link link-dark">
+              <Link to="/client/Customers" className="nav-link link-dark" style={getLinkStyle('/client/Customers')}>
                 <BsPerson className="me-2" style={{ fontSize: '1.5rem' }} />
                 {t('Customers')}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/client/MesQuestionsFavorits" className="nav-link link-dark">
+              <Link to="/client/MesQuestionsFavorits" className="nav-link link-dark" style={getLinkStyle('/client/MesQuestionsFavorits')}>
                 <BsStar className="me-2" style={{ fontSize: '1.5rem' }} />
-                <span style={{ paddingTop: "6px" }}>{t('Favoris')}</span>
-              </a>
+                <span style={{ paddingTop: '6px' }}>{t('Favoris')}</span>
+              </Link>
             </li>
           </ul>
           <hr />

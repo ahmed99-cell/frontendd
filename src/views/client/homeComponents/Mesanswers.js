@@ -77,6 +77,19 @@ const DateInputsContainer = styled.div`
   margin-bottom: 20px;
 `;
 
+const H2 = styled.h2`
+  margin-top: 10%;
+  font-size: 2em; /* Adjust the size as needed */
+  font-weight: bold;
+  color: #333; /* Darker color for better readability */
+  text-align: center; /* Center the heading */
+  font-family: 'Arial', sans-serif; /* Change the font family as needed */
+  text-transform: uppercase; /* Optional: Transform text to uppercase */
+  letter-spacing: 1px; /* Optional: Add space between letters */
+  padding-bottom: 10px; /* Optional: Add some padding below */
+  border-bottom: 2px solid #ddd; /* Optional: Add a bottom border for a more defined look */
+`;
+
 const AnswersPage = () => {
   const userData = JSON.parse(localStorage.getItem('user'));
   const accessToken = userData?.accessToken;
@@ -228,8 +241,10 @@ const AnswersPage = () => {
       <NewNavbar />
       <div style={{ display: 'flex' }}>
         <Sidebar className='h-100' />
+        
         <div style={{ flex: 1 }}>
-          <div style={{ padding: '20px', marginTop: '100px' }}>
+        <H2>My Response</H2>
+          <div style={{ padding: '20px', marginTop: '10px' }}>
             <DateInputsContainer style={{ marginLeft: "25%" }}>
               <div>
                 <label htmlFor="startDate">Date de début :</label>

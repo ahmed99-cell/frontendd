@@ -59,3 +59,48 @@ body {
   border: 0;
   margin-bottom: 1rem;
 }
+.avatar-container {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar-image {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-label {
+  position: absolute;
+  bottom: 5px; /* Adjust to your preference */
+  right: -65px;  /* Adjust to your preference */
+  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
+  color: #fff;
+  padding: 5px 10px; /* Padding around the text */
+  border-radius: 23px; /* Rounded corners to match the circular shape */
+  cursor: pointer;
+  font-size: 0.8rem; /* Adjust text size */
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff; /* Optional: adds a border around the label */
+  opacity: 0; /* Initially hidden */
+  transition: opacity 0.3s ease-in-out; /* Smooth transition for opacity */
+}
+
+.file-label-text {
+  font-size: 0.8rem; /* Text size */
+  margin: 0; /* Remove default margins */
+}
+
+
+.avatar-container:hover .file-label {
+  opacity: 1; /* Show button on hover */
+}
