@@ -41,7 +41,7 @@ const AjouterModerateur = () => {
         }
         try {
             // Envoyez les données du formulaire au backend
-            const response = await axios.post('http://localhost:8080/api/auth/signup', formData);
+            const response = await axios.post('http://localhost:8083/api/auth/signup', formData);
             console.log(response.data);
             alert('ajout réussie !');
             setLoading(false);

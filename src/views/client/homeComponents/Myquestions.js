@@ -137,12 +137,12 @@ const ChartComponent = () => {
       const fetchData = async () => {
         try {
           // Fetch user info
-          const userResponse = await axios.get(`http://localhost:8080/api/user/${id}`);
+          const userResponse = await axios.get(`http://localhost:8083/api/user/${id}`);
           setUserName(userResponse.data.username);
           setUserPoints(userResponse.data.reputation.score);
           setUserImage(userResponse.data.imageBase64 || ''); // Set fallback to empty string
 
-          const questionsResponse = await axios.get('http://localhost:8080/api/questions/by-user-and-date', {
+          const questionsResponse = await axios.get('http://localhost:8083/api/questions/by-user-and-date', {
             params: {
               userId: id,
               startDate: '2024-01-01',
@@ -150,7 +150,7 @@ const ChartComponent = () => {
             }
           });
 
-          const answersResponse = await axios.get('http://localhost:8080/api/questions/byuseranddate', {
+          const answersResponse = await axios.get('http://localhost:8083/api/questions/byuseranddate', {
             params: {
               userId: id,
               startDate: '2024-01-01',

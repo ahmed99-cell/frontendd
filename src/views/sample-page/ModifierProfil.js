@@ -63,7 +63,7 @@ const userId = userData.id;
     try {
       // Send a PUT request to update the profile
       const response = await axios.put(
-        `http://localhost:8080/api/user/${userId}`,
+        `http://localhost:8083/api/user/${userId}`,
         formData,
         {
           headers: {

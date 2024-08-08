@@ -113,7 +113,7 @@ const MesQuestions = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/questions/by-user-and-date?userId=${userId}&startDate=${startDate}&endDate=${endDate}`, {
+        const response = await axios.get(`http://localhost:8083/api/questions/by-user-and-date?userId=${userId}&startDate=${startDate}&endDate=${endDate}`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -155,7 +155,7 @@ const MesQuestions = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await axios.delete(`http://localhost:8080/api/questions/${questionId}`, {
+          const response = await axios.delete(`http://localhost:8083/api/questions/${questionId}`, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },

@@ -104,7 +104,7 @@ const Customers = () => {
   useEffect(() => {
     // Fetch users
     axios
-      .get('http://localhost:8080/api/users')
+      .get('http://localhost:8083/api/users')
       .then((response) => {
         const userDataString = localStorage.getItem('user');
         if (userDataString) {
@@ -126,7 +126,7 @@ const Customers = () => {
       });
 
      
-        const socket = new SockJS('http://localhost:8080/ws');
+        const socket = new SockJS('http://localhost:8083/ws');
         const stompClient = new Client({
           webSocketFactory: () => socket,
           onConnect: (frame) => {

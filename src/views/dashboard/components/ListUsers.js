@@ -28,7 +28,7 @@ const ListUsers = () => {
 
   useEffect(() => {
     axios
-      .get('http://localhost:8080/api/users')
+      .get('http://localhost:8083/api/users')
       .then((response) => {
         const userDataString = localStorage.getItem('user');
         if (userDataString) {
@@ -64,7 +64,7 @@ const ListUsers = () => {
       });
 
       if (result.isConfirmed) {
-        await axios.delete(`http://localhost:8080/api/user/${userId}`);
+        await axios.delete(`http://localhost:8083/api/user/${userId}`);
         await Swal.fire({
           icon: 'success',
           title: 'Utilisateur supprimé',
@@ -86,7 +86,7 @@ const ListUsers = () => {
 
   const handleRoleEdit = async (userId, newRole) => {
     try {
-      const response = await axios.put(`http://localhost:8080/api/${userId}/role`, {
+      const response = await axios.put(`http://localhost:8083/api/${userId}/role`, {
         newRoleName: newRole,
       });
       setUsers((prevUsers) =>

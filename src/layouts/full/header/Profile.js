@@ -47,7 +47,7 @@ const Profile = () => {
         setUsername(userData.username);
         const matricul = userData.id;
         if (matricul) {
-          axios.get(`http://localhost:8080/api/user/${matricul}`)
+          axios.get(`http://localhost:8083/api/user/${matricul}`)
             .then(response => {
               
               const base64Image = response.data?.imageBase64;

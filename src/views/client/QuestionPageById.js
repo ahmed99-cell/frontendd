@@ -157,7 +157,7 @@ function QuestionsPageById() {
       });
  
       await axios.post(
-        `http://localhost:8080/api/questions/${questionId}/answers`,
+        `http://localhost:8083/api/questions/${questionId}/answers`,
         formData,
  
         {
@@ -193,7 +193,7 @@ function QuestionsPageById() {
   const fetchQuestionById = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:8080/api/questions/${questionId}`, {
+      const response = await axios.get(`http://localhost:8083/api/questions/${questionId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -224,7 +224,7 @@ function QuestionsPageById() {
     const entityType = 'Question';
     const entityId = questionId;
     axios
-      .get(`http://localhost:8080/api/votes/status`, {
+      .get(`http://localhost:8083/api/votes/status`, {
         params: {
           entityType,
           entityId,
@@ -243,7 +243,7 @@ function QuestionsPageById() {
   useEffect(() => {
     const incrementView = async () => {
       try {
-        await axios.put(`http://localhost:8080/api/questions/${questionId}/increment-view`);
+        await axios.put(`http://localhost:8083/api/questions/${questionId}/increment-view`);
         console.log('View count incremented successfully.');
       } catch (error) {
         console.error('Error incrementing view count:', error);
@@ -276,7 +276,7 @@ function QuestionsPageById() {
       }
  
       const response = await axios.post(
-        `http://localhost:8080/api/questions/${questionId}/answers/${parentAnswerId}/responses`,
+        `http://localhost:8083/api/questions/${questionId}/answers/${parentAnswerId}/responses`,
         { content: replyContent },
         {
           headers: {
@@ -295,7 +295,7 @@ function QuestionsPageById() {
  
   const handleVote = (value) => {
     axios
-      .post(`http://localhost:8080/api/votes/Question/${questionId}`, null, {
+      .post(`http://localhost:8083/api/votes/Question/${questionId}`, null, {
         params: {
           userId,
           value,
@@ -314,7 +314,7 @@ function QuestionsPageById() {
   };
   const handleVote1 = (value, id) => {
     axios
-      .post(`http://localhost:8080/api/votes/Answer/${id}`, null, {
+      .post(`http://localhost:8083/api/votes/Answer/${id}`, null, {
         params: {
           userId,
           value,
@@ -347,7 +347,7 @@ function QuestionsPageById() {
   useEffect(() => {
     const fetchAnswers = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/questions/${questionId}/answers`);
+        const response = await axios.get(`http://localhost:8083/api/questions/${questionId}/answers`);
         setAnswers(response.data);
       } catch (error) {
         console.error('Error fetching answers:', error);
@@ -359,8 +359,22 @@ function QuestionsPageById() {
  
  
   const handleAcceptAnswer = async (answerId) => {
-    const userId = localStorage.getItem('userId'); // Récupérer l'ID de l'utilisateur depuis le localStorage
-    const questionCreatorId = question.userId; // Assurez-vous d'avoir l'ID du créateur de la question
+    const user = localStorage.getItem('user');
+
+    
+    if (user) {
+      
+      const parsedUser = JSON.parse(user);
+
+      
+      const userId = parsedUser.id;
+
+      
+      console.log('User ID:', userId);
+    } else {
+      console.log('No user found in localStorage.');
+    }
+    const questionCreatorId = question.userId;// Assurez-vous d'avoir l'ID du créateur de la question
   
     if (userId !== questionCreatorId) {
       Swal.fire('Sorry', 'Only the user who created the question can mark an answer as accepted', 'error');
@@ -369,7 +383,7 @@ function QuestionsPageById() {
   
     try {
       const response = await axios.put(
-        `http://localhost:8080/api/questions/${answerId}/accept`,
+        `http://localhost:8083/api/questions/${answerId}/accept`,
         {},
         {
           headers: {

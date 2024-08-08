@@ -102,7 +102,7 @@ const AnswersPage = () => {
 
   const fetchAnswers = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/questions/byuseranddate?userId=${userId}&startDate=${startDate}&endDate=${endDate}`, {
+      const response = await axios.get(`http://localhost:8083/api/questions/byuseranddate?userId=${userId}&startDate=${startDate}&endDate=${endDate}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -126,48 +126,64 @@ const AnswersPage = () => {
   };
 
   const handleEditClick = async (questionId, answerId) => {
-    const selected = answers.find(answer => answer.id === answerId);
+    const selected = answers.find((answer) => answer.id === answerId);
     if (!selected) {
-      console.error(`Answer with id ${answerId} not found.`);
+      console.error("Answer with id ${answerId} not found.");
       return;
     }
 
-    const { value: newContent } = await MySwal.fire({
+    const { value: formData } = await MySwal.fire({
       title: 'Edit Answer',
-      html: (
-        <textarea
-          defaultValue={selected.content || ''}
-          style={{ width: '100%', minHeight: '100px' }}
-        />
-      ),
+      html: `
+            <textarea id="swal-textarea" style="width: 100%; min-height: 100px;">${
+              selected.content || ''
+            }</textarea>
+            <input type="file" id="swal-file" style="margin-top: 10px;" />
+        `,
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Save Changes',
       preConfirm: () => {
-        const content = document.querySelector('textarea').value;
-        if (!content) {
-          MySwal.showValidationMessage('The content cannot be empty');
+        const content = document.querySelector('#swal-textarea').value;
+        const fileInput = document.querySelector('#swal-file');
+        const file = fileInput.files[0];
+
+        if (!content && !file) {
+          MySwal.showValidationMessage('Content or file must be provided');
         }
-        return content;
+        return { content, file };
       },
     });
 
-    if (newContent) {
+    if (formData) {
+      const { content, file } = formData;
+
+      // Prepare form data for submission
+      const updateFormData = new FormData();
+      updateFormData.append('content', content);
+
+      if (file) {
+        updateFormData.append('file', file);
+      }
+
       try {
-        await axios.put(`http://localhost:8080/api/questions/${questionId}/answers/${answerId}`, {
-          content: newContent,
-        }, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
+        await axios.put(
+         `http://localhost:8083/api/questions/${questionId}/answers/${answerId}`,
+          updateFormData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization:` Bearer ${accessToken}`,
+            },
           },
-        });
+        );
         MySwal.fire({
           title: 'Updated!',
           text: 'Your answer has been updated.',
           icon: 'success',
         });
-        fetchAnswers();
+        fetchAnswers(); // Refresh answers
       } catch (error) {
         console.error('Error updating answer:', error);
         MySwal.fire({
@@ -178,7 +194,6 @@ const AnswersPage = () => {
       }
     }
   };
-
   const handleDeleteClick = async (answerId, questionId) => {
     if (!answerId || !questionId) {
       console.error('Invalid questionId or answerId for delete');
@@ -196,7 +211,7 @@ const AnswersPage = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:8080/api/questions/${questionId}/answers/${answerId}`, {
+          await axios.delete(`http://localhost:8083/api/questions/${questionId}/answers/${answerId}`, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },

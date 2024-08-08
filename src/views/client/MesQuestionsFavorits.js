@@ -104,7 +104,7 @@ const MesQuestionsFavorites = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/favorites/favorit/${userId}`);
+        const response = await axios.get(`http://localhost:8083/api/favorites/favorit/${userId}`);
         setQuestions(response.data);
       } catch (error) {
         console.error('Error fetching favorite questions:', error);
@@ -127,7 +127,7 @@ const MesQuestionsFavorites = () => {
 
       if (isQuestionFavorite) {
         const favoriteId = question.favorites[0].id;
-        const response = await axios.delete(`http://localhost:8080/api/favorites/${favoriteId}`, {
+        const response = await axios.delete(`http://localhost:8083/api/favorites/${favoriteId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

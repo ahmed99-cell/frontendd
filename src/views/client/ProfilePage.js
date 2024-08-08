@@ -47,7 +47,7 @@ function ProfilePage() {
   useEffect(() => {
     const userId = JSON.parse(localStorage.getItem('user'))?.id;
     if (userId) {
-      axios.get(`http://localhost:8080/api/user/${userId}`)
+      axios.get(`http://localhost:8083/api/user/${userId}`)
         .then(response => {
           const { prenom, nom, email, username, imageBase64 } = response.data;
           setFormData(prev => ({
@@ -134,7 +134,7 @@ function ProfilePage() {
       }
   
       await axios.put(
-        `http://localhost:8080/api/user/${userId}`,
+        `http://localhost:8083/api/user/${userId}`,
         formDataToSend,
         {
           headers: {
