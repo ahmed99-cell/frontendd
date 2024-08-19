@@ -14,7 +14,9 @@ import UserAvatar from './UserAvatar';
 import { FaLink } from 'react-icons/fa';
 import { IoIosCheckmarkCircleOutline } from 'react-icons/io';
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 const GlobalStyle = createGlobalStyle`
+
   @import url('https://fonts.googleapis.com/css2?family=PlusJakartaSans:wght@300,400;700&display=swap');
   body {
       Background: #FFF;
@@ -123,6 +125,9 @@ function QuestionsPageById() {
   const [filePreview, setFilePreview] = useState(null);
  
   const token = localStorage.getItem('token');
+  const navigate = useNavigate();
+  const [isAccepted, setIsAccepted] = useState(false);
+
  
   const userObject = JSON.parse(localStorage.getItem('user'));
   const userId = userObject ? userObject.id : null;
@@ -139,9 +144,13 @@ function QuestionsPageById() {
       setFilePreview(fileURL);
     }
   };
+  const refreshPage = () => {
+    navigate(0); // This will reload the current route
+  };
  
   const handleSubmit = async (event) => {
     event.preventDefault();
+    
  
     try {
       const token = localStorage.getItem('token');
@@ -176,6 +185,22 @@ function QuestionsPageById() {
       console.error('Error posting answer:', error.message);
     }
   };
+  useEffect(() => {
+    try {
+      if (question && question.answers && Array.isArray(question.answers)) {
+        const acceptedAnswerExists = question.answers.some(
+          (answer) => answer.accepted === true || answer.accepted === 'true',
+        );
+
+        console.log('Accepted Answer Exists:', acceptedAnswerExists);
+        setIsAccepted(acceptedAnswerExists);
+      } else {
+        console.error('Expected question.answers to be an array but got:', question.answers);
+      }
+    } catch (error) {
+      console.error('Error processing question:', error);
+    }
+  }, [question]);
  
   const handleAddLink = () => {
     const link = prompt('Enter the link URL:');
@@ -361,51 +386,95 @@ function QuestionsPageById() {
   const handleAcceptAnswer = async (answerId) => {
     const user = localStorage.getItem('user');
 
-    
     if (user) {
-      
       const parsedUser = JSON.parse(user);
-
-      
       const userId = parsedUser.id;
+      const questionCreatorId = question.userId;
 
-      
-      console.log('User ID:', userId);
+      if (userId !== questionCreatorId) {
+        Swal.fire(
+          'Sorry',
+          'Only the user who created the question can mark an answer as accepted',
+          'error',
+        );
+        return;
+      }
+
+      try {
+        const response = await axios.put(
+          `http://localhost:8083/api/questions/${answerId}/accept`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        if (response.status === 200) {
+          Swal.fire('Answer marked as correct', '', 'success');
+
+          setAnswers((prevAnswers) =>
+            prevAnswers.map((answer) =>
+              answer.id === answerId ? { ...answer, accepted: true } : answer,
+            ),
+          );
+          refreshPage();
+        }
+      } catch (error) {
+        console.error('Error accepting answer:', error);
+      }
     } else {
       console.log('No user found in localStorage.');
     }
-    const questionCreatorId = question.userId;// Assurez-vous d'avoir l'ID du créateur de la question
-  
-    if (userId !== questionCreatorId) {
-      Swal.fire('Sorry', 'Only the user who created the question can mark an answer as accepted', 'error');
-      return;
-    }
-  
-    try {
-      const response = await axios.put(
-        `http://localhost:8083/api/questions/${answerId}/accept`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-  
-      if (response.status === 200) {
-        Swal.fire('Answer marked as correct', '', 'success').then(() => {
-          window.location.reload();
-        });
-        setAnswers((prevAnswers) =>
-          prevAnswers.map((answer) =>
-            answer.id === answerId ? { ...answer, accepted: true } : { ...answer, accepted: false }
-          )
-        );
-      }
-    } catch (error) {
-      console.error('Error accepting answer:', error);
-    }
   };
+
+  const handleUnacceptAnswer = async (answerId) => {
+    const user = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+
+    if (user) {
+      const parsedUser = JSON.parse(user);
+      const userId = parsedUser.id;
+      const questionCreatorId = question.userId;
+
+      if (userId !== questionCreatorId) {
+        Swal.fire(
+          'Sorry',
+          'Only the user who created the question can unmark an answer as accepted',
+          'error',
+        );
+        return;
+      }
+
+      try {
+        const response = await axios.put(
+          `http://localhost:8083/api/questions/${answerId}/unaccept`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        if (response.status === 200) {
+          Swal.fire('Answer unmarked as correct', '', 'success');
+
+          setAnswers((prevAnswers) =>
+            prevAnswers.map((answer) =>
+              answer.id === answerId ? { ...answer, accepted: false } : answer,
+            ),
+          );
+          refreshPage();
+        }
+      } catch (error) {
+        console.error('Error unaccepting answer:', error);
+      }
+    } else {
+      console.log('No user found in localStorage.');
+    }
+  };;
   return (
     <>
       <NewNavbar />
@@ -655,18 +724,26 @@ function QuestionsPageById() {
                                           )}
                                         </div>
                                       )}
-                                    {!answer.accepted && (
-            <CheckmarkIcon
-              isAccepted={answer.accepted}
-              onClick={() => handleAcceptAnswer(answer.id)}
-            />
-          )}
-          {answer.accepted && (
-            <CorrectAnswerLabel>
-              <IoIosCheckmarkCircleOutline />
-              Correct Answer
-            </CorrectAnswerLabel>
-          )}
+                                   {answer.accepted ? (
+                                        <div
+                                          onClick={() => handleUnacceptAnswer(answer.id)}
+                                          style={{
+                                            cursor: 'pointer',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                          }}
+                                        >
+                                          <CorrectAnswerLabel>
+                                            <IoIosCheckmarkCircleOutline />
+                                            Correct Answer
+                                          </CorrectAnswerLabel>
+                                        </div>
+                                      ) : (
+                                        <CheckmarkIcon
+                                          isAccepted={answer.accepted}
+                                          onClick={() => handleAcceptAnswer(answer.id)}
+                                        />
+                                      )}
                                     </Cader>
                                    
                                     <span>
@@ -786,80 +863,94 @@ function QuestionsPageById() {
                                 <Separator />
                               </React.Fragment>
                             ))}
-                          <form onSubmit={handleSubmit}>
-                            <div style={{ position: 'relative' }}>
-                              <textarea
-                                value={answer}
-                                onChange={(e) => setAnswer(e.target.value)}
-                                placeholder="Your answer"
-                                cols="30"
-                                rows="3"
-                                style={{
-                                  width: '100%',
-                                  marginBottom: '10px',
-                                  paddingRight: '40px',
-                                }}
-                              />
-                              <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
-                                <button
-                                  type="button"
-                                  onClick={handleAddLink}
-                                  style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    fontSize: '24px',
-                                  }}
-                                >
-                                  <FaLink />
-                                </button>
-                                <input
-                                  type="file"
-                                  id="fileInput"
-                                  onChange={handleFileChange}
-                                  style={{ display: 'none' }}
-                                />
-                                <label
-                                  htmlFor="fileInput"
-                                  style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    fontSize: '24px',
-                                  }}
-                                >
-                                  <svg
-                                    viewBox="0 0 24 24"
-                                    style={{ width: '24px', height: '24px' }}
-                                  >
-                                    <path d="M20,20H4V4H12L14,2H4C2.89,2 2,2.89 2,4V20C2,21.1 2.9,22 4,22H20C21.1,22 22,21.1 22,20V10H20V20M20,8V4H14L20,8Z" />
-                                  </svg>
-                                </label>
-                              </div>
+                         {isAccepted ? (
+                            <div>
+                              <p>
+                                Apologies, but with your effort ❤ , we found the best answer. The
+                                question is now closed.
+                              </p>
                             </div>
-                            {filePreview && (
-                              <div>
-                                <h4>Preview :</h4>
-                                <img
-                                  src={filePreview}
-                                  alt="Preview"
-                                  style={{ maxWidth: '200px' }}
+                          ) : (
+                            <form onSubmit={handleSubmit}>
+                              <div style={{ position: 'relative' }}>
+                                <textarea
+                                  value={answer}
+                                  onChange={(e) => setAnswer(e.target.value)}
+                                  placeholder="Your answer"
+                                  cols="30"
+                                  rows="3"
+                                  style={{
+                                    width: '100%',
+                                    marginBottom: '10px',
+                                    paddingRight: '40px',
+                                    backgroundColor: '#fff',
+                                    border: '1px solid #ddd',
+                                  }}
                                 />
+                                <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+                                  <button
+                                    type="button"
+                                    onClick={handleAddLink}
+                                    style={{
+                                      background: 'none',
+                                      border: 'none',
+                                      cursor: 'pointer',
+                                      fontSize: '24px',
+                                      pointerEvents: 'auto',
+                                    }}
+                                  >
+                                    <FaLink />
+                                  </button>
+                                  <input
+                                    type="file"
+                                    id="fileInput"
+                                    onChange={handleFileChange}
+                                    style={{ display: 'none' }}
+                                  />
+                                  <label
+                                    htmlFor="fileInput"
+                                    style={{
+                                      background: 'none',
+                                      border: 'none',
+                                      cursor: 'pointer',
+                                      fontSize: '24px',
+                                      pointerEvents: 'auto',
+                                    }}
+                                  >
+                                    <svg
+                                      viewBox="0 0 24 24"
+                                      style={{ width: '24px', height: '24px' }}
+                                    >
+                                      <path d="M20,20H4V4H12L14,2H4C2.89,2 2,2.89 2,4V20C2,21.1 2.9,22 4,22H20C21.1,22 22,21.1 22,20V10H20V20M20,8V4H14L20,8Z" />
+                                    </svg>
+                                  </label>
+                                </div>
                               </div>
-                            )}
-                            <button
-                              className="btn"
-                              style={{
-                                marginRight: '20px',
-                                marginTop: '20px',
-                                backgroundColor: '#cf022b',
-                                color: '#fff',
-                              }}
-                              type="submit"
-                            >
-                              Post your answer
-                            </button>
-                          </form>
+                              {filePreview && (
+                                <div>
+                                  <h4>Preview :</h4>
+                                  <img
+                                    src={filePreview}
+                                    alt="Preview"
+                                    style={{ maxWidth: '200px' }}
+                                  />
+                                </div>
+                              )}
+
+                              <button
+                                className="btn"
+                                style={{
+                                  marginRight: '20px',
+                                  marginTop: '20px',
+                                  backgroundColor: '#cf022b',
+                                  color: '#fff',
+                                }}
+                                type="submit"
+                              >
+                                Post your answer
+                              </button>
+                            </form>
+                          )}
                         </div>
                       </div>
                     </div>

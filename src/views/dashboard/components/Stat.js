@@ -5,26 +5,30 @@ import DashboardCard from '../../../components/shared/DashboardCard';
 import Chart from 'react-apexcharts';
 import axios from 'axios';
 
+
 const Stat = () => {
     const [month, setMonth] = useState(''); // Default to show all year
     const [questionsData, setQuestionsData] = useState(Array(12).fill(0));
     const [answersData, setAnswersData] = useState(Array(12).fill(0));
     const [filteredQuestionsData, setFilteredQuestionsData] = useState(Array(12).fill(0));
     const [filteredAnswersData, setFilteredAnswersData] = useState(Array(12).fill(0));
+    const [tagData, setTagData] = useState([]); // State for storing tag data
 
     const theme = useTheme();
     const primary = theme.palette.primary.main;
     const secondary = theme.palette.secondary.main;
 
+    
     useEffect(() => {
         // Fetch data from API
         axios.get('http://localhost:8083/api/questions')
             .then(response => {
                 const data = response.data;
+                console.log(data);
 
-                // Initialize arrays for 12 months
                 const questionsCounts = Array(12).fill(0);
                 const answersCounts = Array(12).fill(0);
+                const tagCounts = {};
 
                 data.forEach(question => {
                     const questionMonth = new Date(question.createdAt).getMonth();
@@ -34,10 +38,19 @@ const Stat = () => {
                         const answerMonth = new Date(answer.createdAt).getMonth();
                         answersCounts[answerMonth] += 1;
                     });
+
+                    question.tags.forEach(tag => {
+                        if (tagCounts[tag]) {
+                            tagCounts[tag] += 1;
+                        } else {
+                            tagCounts[tag] = 1;
+                        }
+                    });
                 });
 
                 setQuestionsData(questionsCounts);
                 setAnswersData(answersCounts);
+                setTagData(Object.entries(tagCounts).map(([tag, count]) => ({ tag, count })));
                 updateFilteredData(''); // Default to show all year
             })
             .catch(error => console.error('Error fetching data:', error));
@@ -141,6 +154,36 @@ const Stat = () => {
         },
     };
 
+    const seriestagchart = tagData.map(tag => tag.count);
+
+    const optionstagchart = {
+        chart: {
+            type: 'donut', // Changed to donut chart
+            fontFamily: "'Plus Jakarta Sans', sans-serif;",
+            foreColor: '#adb0bb',
+            toolbar: {
+                show: true,
+            },
+            height: 370,
+        },
+        colors: [secondary, primary, '#FF5733', '#C70039', '#900C3F', '#581845'], // Custom colors for tags
+        dataLabels: {
+            enabled: true,
+            formatter: function (val, opts) {
+                return opts.w.globals.labels[opts.seriesIndex] + ": " + val + "%";
+            }
+        },
+        legend: {
+            show: true,
+            position: 'bottom',
+        },
+        labels: tagData.map(tag => tag.tag), // Tag names as labels
+        tooltip: {
+            theme: theme.palette.mode === 'dark' ? 'dark' : 'light',
+            fillSeriesColor: false,
+        },
+    };
+
     const seriescolumnchart = [
         {
             name: 'Questions',
@@ -153,36 +196,53 @@ const Stat = () => {
     ];
 
     return (
-        <DashboardCard title="Admin Stats" action={
-            <Select
-                labelId="month-dd"
-                id="month-dd"
-                value={month}
-                size="small"
-                onChange={handleChange}
-            >
-                <MenuItem value="">
-                    Toute l'année
-                </MenuItem>
-                {monthNames.map((name, index) => (
-                    <MenuItem
-                        key={index}
-                        value={index + 1}
-                        style={{ color: index === 0 ? 'red' : 'inherit' }} // Change color of the first month (e.g., January)
+        <div>
+            <DashboardCard
+                title="Admin Stats"
+                action={
+                    <Select
+                        labelId="month-dd"
+                        id="month-dd"
+                        value={month}
+                        size="small"
+                        onChange={handleChange}
                     >
-                        {name} 2024
-                    </MenuItem>
-                ))}
-            </Select>
-        }>
-            <Chart
-                options={optionscolumnchart}
-                series={seriescolumnchart}
-                type="bar"
-                height="370px"
-            />
-        </DashboardCard>
+                        <MenuItem value="">
+                            Toute l'année
+                        </MenuItem>
+                        {monthNames.map((name, index) => (
+                            <MenuItem
+                                key={index}
+                                value={index + 1}
+                                style={{ color: index === 0 ? 'red' : 'inherit' }} // Customize the first month
+                            >
+                                {name} 2024
+                            </MenuItem>
+                        ))}
+                    </Select>
+                }
+            >
+                <p>This chart shows the number of questions and answers posted each month.</p>
+                <Chart
+                    options={optionscolumnchart}
+                    series={seriescolumnchart}
+                    type="bar"
+                    height="370px"
+                />
+            </DashboardCard>
+                <br></br>
+            <DashboardCard title="Tag Distribution">
+                <p>This donut chart shows the distribution of tags across all questions.</p>
+                <Chart
+                    options={optionstagchart}
+                    series={seriestagchart}
+                    type="donut"
+                    height="370px"
+                />
+            </DashboardCard>
+        </div>
     );
 };
 
 export default Stat;
+
