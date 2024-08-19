@@ -11,12 +11,18 @@ import {
   IconButton,
   TextField,
   Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import DashboardCard from '../../../components/shared/DashboardCard';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
 import { useNavigate } from 'react-router';
 import Swal from 'sweetalert2';
+
+const roles = ['ROLE_USER', 'ROLE_MODERATOR', 'ROLE_ADMIN']; // Define your roles here
 
 const ListUsers = () => {
   const navigate = useNavigate();
@@ -35,7 +41,7 @@ const ListUsers = () => {
           try {
             const userData = JSON.parse(userDataString);
             const filteredUsers = response.data.filter(
-              (user) => user.matricul !== parseInt(userData.id),
+              (user) => user.matricule !== parseInt(userData.id),
             );
             setUsers(filteredUsers);
           } catch (error) {
@@ -85,13 +91,20 @@ const ListUsers = () => {
   };
 
   const handleRoleEdit = async (userId, newRole) => {
+    if (!userId || !newRole) {
+      console.error('Le nouveau rôle ou l\'ID de l\'utilisateur est manquant.', { userId, newRole });
+      return;
+    }
+  
+    console.log('Envoi du rôle:', newRole, 'pour l\'utilisateur ID:', userId);
+  
     try {
       const response = await axios.put(`http://localhost:8083/api/${userId}/role`, {
         newRoleName: newRole,
       });
       setUsers((prevUsers) =>
         prevUsers.map((user) => {
-          if (user.matricul === userId) {
+          if (user.matricule === userId) {
             return { ...user, roles: [newRole] };
           }
           return user;
@@ -113,23 +126,9 @@ const ListUsers = () => {
       });
     }
   };
-
-  const handleRoleClick = async (userId, currentRole) => {
-    const { value: newRole } = await Swal.fire({
-      title: 'Modifier le rôle',
-      input: 'text',
-      inputLabel: 'Entrez le nouveau rôle',
-      inputValue: currentRole,
-      showCancelButton: true,
-      confirmButtonText: 'Sauvegarder',
-      cancelButtonText: 'Annuler',
-    });
-
-    if (newRole) {
-      handleRoleEdit(userId, newRole);
-    }
-  };
-
+  
+  
+  
   const handleSortNom = () => {
     const sortedUsers = [...users].sort((a, b) => {
       if (sortOrderNom === 'asc') {
@@ -159,11 +158,13 @@ const ListUsers = () => {
       user.nom.toLowerCase().includes(filterNom.toLowerCase()) &&
       user.prenom.toLowerCase().includes(filterPrenom.toLowerCase()),
   );
+  const roles = ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_MODERATOR']; 
+
 
   return (
     <DashboardCard title="User List">
       <Box sx={{ overflow: 'auto', width: { xs: '280px', sm: 'auto' } }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 , mt:"10px"}}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, mt: "10px" }}>
           <TextField
             label="Filter by Nom"
             variant="outlined"
@@ -245,17 +246,25 @@ const ListUsers = () => {
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  {user.roles &&
-                    user.roles.map((role) => (
-                      <Chip
-                        key={role}
-                        label={role}
-                        onClick={() => handleRoleClick(user.matricul, role)}
-                      />
-                    ))}
-                </TableCell>
+  <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
+    <InputLabel>Role</InputLabel>
+    <Select
+      value={user.roles[0] || ''}
+      onChange={(e) => handleRoleEdit(user.matricule, e.target.value)}
+      label="Role"
+    >
+      {roles.map((role) => (
+        <MenuItem key={role} value={role}>
+          {role}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>
+</TableCell>
+
+
                 <TableCell align="right">
-                  <IconButton onClick={() => handleDeleteUser(user.matricul)}>
+                  <IconButton onClick={() => handleDeleteUser(user.matricule)}>
                     <DeleteIcon />
                   </IconButton>
                 </TableCell>
@@ -264,7 +273,7 @@ const ListUsers = () => {
           </TableBody>
         </Table>
         <h1 style={{ marginTop: '30px', fontSize: '14px', marginRight: '50px' }}>
-          You can change the role by clicking on it *(ROLE_MODERATOR OR ROLE_USER OR ROLE_ADMIN)
+          You can change the role by selecting it from the dropdown *(ROLE_MODERATOR OR ROLE_USER OR ROLE_ADMIN)
         </h1>
       </Box>
     </DashboardCard>

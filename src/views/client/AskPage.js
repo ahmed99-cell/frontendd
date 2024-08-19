@@ -104,13 +104,28 @@ const AskPage = () => {
           headers: headers, // Pass the headers object to Axios
         });
         if (response.status === 200) {
-          await Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: 'Question created successfully!',
-          });
- 
-          navigate('/client/questionpage'); 
+          const { est_duplique, similarites, contient_mots_interdits } = response.data;
+  
+          if (est_duplique) {
+            await Swal.fire({
+              icon: 'warning',
+              title: 'Question Duplicate',
+              text: 'This question already exists. Here are the similarities: ' + similarites.join(', '),
+            });
+          } else if (contient_mots_interdits) {
+            await Swal.fire({
+              icon: 'warning',
+              title: 'Bad Words Detected',
+              text: 'Your question contains inappropriate language.',
+            });
+          } else {
+            await Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'Question created successfully!',
+            });
+            navigate('/client/questionpage');
+          }
         }
       } catch (error) {
         console.error('Error:', error);
