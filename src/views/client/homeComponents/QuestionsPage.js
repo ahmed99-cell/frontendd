@@ -342,7 +342,7 @@ useEffect(() => {
           userId: selectedUser,
           tags: selectedTags,
           pageIndex: 0,
-          pageSize: 15,
+          pageSize: 10000000000,
           userAnonymous: null,
         }),
       });

@@ -144,26 +144,22 @@ const Profile = () => {
             </MenuItem>
           )}
         </div>
-        {!isAdmin  && (
-        <>
-          <MenuItem>
-            <ListItemIcon>
-              <IconMail width={20} />
-            </ListItemIcon>
-            <Link to="/client/Mesquestions" style={{ textDecoration: 'none', color: 'inherit' }}>
-              <ListItemText>My Questions</ListItemText>
-            </Link>
-          </MenuItem>
-          <MenuItem>
-            <ListItemIcon>
-              <IconListCheck width={20} />
-            </ListItemIcon>
-            <Link to="/client/Mesanswers" style={{ textDecoration: 'none', color: 'inherit' }}>
-              <ListItemText>My Answers</ListItemText>
-            </Link>
-          </MenuItem>
-        </>
-      )}
+        {!isAdmin && (
+    [
+      <MenuItem key="my-questions" component={Link} to="/client/Mesquestions">
+        <ListItemIcon>
+          <IconMail width={20} />
+        </ListItemIcon>
+        <ListItemText>My Questions</ListItemText>
+      </MenuItem>,
+      <MenuItem key="my-answers" component={Link} to="/client/Mesanswers">
+        <ListItemIcon>
+          <IconListCheck width={20} />
+        </ListItemIcon>
+        <ListItemText>My Answers</ListItemText>
+      </MenuItem>
+    ]
+  )}
         <Box mt={1} py={1} px={2}>
           <Button to="/auth/login" variant="outlined" color="primary" component={Link} fullWidth onClick={cleanLocalStorage}>
             Logout
