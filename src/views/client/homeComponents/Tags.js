@@ -9,6 +9,7 @@ import '../homeComponents/swal.css';
 import { FaTrash, FaEdit } from 'react-icons/fa'; 
 import Darkmode from 'darkmode-js';
 import { useTranslation} from 'react-i18next';
+
 export default function Tags() {
   const [tags, setTags] = useState([]);
   const [expandedTagIds, setExpandedTagIds] = useState([]);
@@ -55,27 +56,42 @@ export default function Tags() {
 
   const handleAddTag = async () => {
     const { value: formValues } = await Swal.fire({
-      title: 'Add New Tag',
-      html:
-        '<input id="name" class="swal2-input" style="margin-bottom : 10px"  placeholder="Enter tag name" />' +
-        '<textarea id="description" class="swal2-input" style="padding : 10px" placeholder="Enter tag description"></textarea>',
+      title: t('Add New Tag'),
+      html: `
+        <div class="swal2-custom-input-container">
+          <input id="name" class="swal2-input swal2-custom-input" placeholder="${t('Enter tag name')}" />
+        </div>
+        <div class="swal2-custom-textarea-container">
+          <textarea id="description" class="swal2-textarea swal2-custom-textarea" placeholder="${t('Enter tag description')}" rows="4"></textarea>
+        </div>
+      `,
       focusConfirm: false,
       preConfirm: () => {
-        return {
-          name: document.getElementById('name').value,
-          description: document.getElementById('description').value,
-        };
+        const name = document.getElementById('name').value.trim();
+        const description = document.getElementById('description').value.trim();
+  
+        if (!name) {
+          Swal.showValidationMessage(t('Tag name is required.'));
+          return false;
+        }
+  
+        return { name, description };
+      },
+      customClass: {
+        popup: 'swal2-custom-popup',
+        title: 'swal2-custom-title',
+        confirmButton: 'swal2-custom-confirm-button',
       },
     });
-
-    if (formValues && formValues.name) {
-      // Call API to add the new tag
+  
+    if (formValues) {
       try {
         await axios.post('http://localhost:8083/api/tags/create', formValues, {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
         });
+  
         // Refresh the tags list
         const response = await axios.get('http://localhost:8083/api/tags/getAll', {
           headers: {
@@ -83,43 +99,44 @@ export default function Tags() {
           },
         });
         setTags(response.data);
-        Swal.fire('Tag added successfully!', '', 'success');
+  
+        Swal.fire({
+          title: t('Tag added successfully!'),
+          icon: 'success',
+          customClass: {
+            popup: 'swal2-custom-popup',
+            confirmButton: 'swal2-custom-confirm-button',
+          },
+        });
       } catch (error) {
-        console.error('Error adding tag:', error.message);
-        Swal.fire('Error adding tag', '', 'error');
+        console.error(t('Error adding tag:'), error.message);
+        Swal.fire({
+          title: t('Error adding tag'),
+          text: error.message,
+          icon: 'error',
+          customClass: {
+            popup: 'swal2-custom-popup',
+            confirmButton: 'swal2-custom-confirm-button',
+          },
+        });
       }
     }
   };
-
-  useEffect(() => {
-    const options = {
-      bottom: '64px',
-      right: 'unset',
-      left: '32px',
-      time: '0.5s',
-      mixColor: '#fff',
-      backgroundColor: '#fff',
-      buttonColorDark: '#100f2c',
-      buttonColorLight: '#fff',
-      saveInCookies: false,
-      label: '🌓',
-      autoMatchOsTheme: true
-    };
   
-    const darkmode = new Darkmode(options);
-    darkmode.showWidget();
-  }, []);
+
+  
   
   const handleDeleteTag = async (tagId) => {
     // Afficher une boîte de dialogue de confirmation avant la suppression
     const confirmation = await Swal.fire({
-      title: 'Are you sure?',
-      text: 'You will not be able to recover this tag!',
+      title: t('Are you sure?'),
+      text: t('You will not be able to recover this tag!'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, delete it!',
+      confirmButtonText: t('Yes, delete it!'),
+      cancelButtonText: t('Cancel'),
     });
 
     if (confirmation.isConfirmed) {
@@ -132,10 +149,10 @@ export default function Tags() {
         // Actualiser la liste des tags après la suppression
         const updatedTags = tags.filter((tag) => tag.id !== tagId);
         setTags(updatedTags);
-        Swal.fire('Tag deleted successfully!', '', 'success');
+        Swal.fire(t('Tag deleted successfully!'), '', 'success');
       } catch (error) {
         console.error('Error deleting tag:', error.message);
-        Swal.fire('Error deleting tag', '', 'error');
+        Swal.fire(t('Error deleting tag'), '', 'error');
       }
     }
   };
@@ -163,9 +180,12 @@ export default function Tags() {
             Authorization: `Bearer ${votreToken}`,
           },
         });
-        Swal.fire('Tag updated successfully!', '', 'success');
-        window.location.reload();
-
+        Swal.fire({
+          title: t('Tag updated successfully!'),
+          icon: 'success',
+          timer: 5000, // Time in milliseconds (e.g., 5000ms = 5 seconds)
+          showConfirmButton: false, // Optionally hide the confirm button
+        });
         // Update only the tag's description
         setTags((prevTags) =>
           prevTags.map((tag) =>
@@ -174,7 +194,7 @@ export default function Tags() {
         );
       } catch (error) {
         console.error('Error updating tag:', error.message);
-        Swal.fire('Error updating tag', '', 'error');
+        Swal.fire(t('Error updating tag'), '', 'error');
       }
     }
   };
@@ -212,11 +232,9 @@ export default function Tags() {
                           {t('Ajouter Tag')}
                         </button>
                       )}
-                      A tag is a keyword or label that categorizes your question with other, similar
-                      questions.
+                      {t('tagdescription1')}
                       <br />
-                      Using the right tags makes it easier for others to find and answer your
-                      question.
+                      {t('tagdescription2')}
                     </div>
                     <div className="row row-cols-1 row-cols-md-4 g-4 mt-3">
                       {tags.map((tag) => (
@@ -244,7 +262,7 @@ export default function Tags() {
                                   className="btn btn-link"
                                   style={{ padding: 0 }}
                                 >
-                                  {expandedTagIds.includes(tag.id) ? 'Less' : 'Learn More'}
+                                  {expandedTagIds.includes(tag.id) ? 'Less' : t('Learn More')}
                                 </button>
                               </p>
                               {isModerator && (

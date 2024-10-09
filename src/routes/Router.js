@@ -21,6 +21,7 @@ import ListQuestions from 'src/views/sample-page/ListQuestions';
 import YearlyBreakup from 'src/views/dashboard/components/YearlyBreakup';
 import Stat from 'src/views/dashboard/components/Stat';
 import ChartComponent from 'src/views/client/homeComponents/ChartComponent ';
+import AnswersResponsePage from 'src/views/client/homeComponents/MesanswerResponse';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('../layouts/full/FullLayout')));
@@ -90,6 +91,8 @@ const Router = [
       { path: '/client/user', element: <ChartComponent /> },
       { path: '/client/chatbox', element: <ChatBox /> },
       { path: '/client/YearlyBreakup', element: <YearlyBreakup /> },
+      { path: '/client/Mesanswersreponse', element: <AnswersResponsePage /> },
+
     ],
   },
 ];

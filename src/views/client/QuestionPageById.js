@@ -15,6 +15,8 @@ import { FaLink } from 'react-icons/fa';
 import { IoIosCheckmarkCircleOutline } from 'react-icons/io';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
+import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+
 const GlobalStyle = createGlobalStyle`
 
   @import url('https://fonts.googleapis.com/css2?family=PlusJakartaSans:wght@300,400;700&display=swap');
@@ -123,10 +125,14 @@ function QuestionsPageById() {
   const [totalVote, setTotalVote] = useState(null);
   const [voteValue1, setVoteValue1] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
+  const [isModerator, setIsModerator] = useState(false);
+
+  
  
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
   const [isAccepted, setIsAccepted] = useState(false);
+  
 
  
   const userObject = JSON.parse(localStorage.getItem('user'));
@@ -475,6 +481,83 @@ function QuestionsPageById() {
       console.log('No user found in localStorage.');
     }
   };;
+  useEffect(() => {
+    const fetchUserRoles = async () => {
+      try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user && user.roles !== null) {
+          const userRoles = user.roles;
+          if (userRoles.includes('ROLE_MODERATOR')) {
+            setIsModerator(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user roles:', error.message);
+      }
+    };
+
+    fetchUserRoles();
+  }, []);
+
+  const handleTrashClick = async (questionId, answerId) => {
+    const result = await Swal.fire({
+      title: ('Are you sure?'),
+      text: ("You won't be able to revert this!"),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: ('Yes, delete it!'),
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(
+          `http://localhost:8083/api/questions/${questionId}/answers/${answerId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+            },
+          },
+        );
+
+        Swal.fire(('Deleted!'), ('The answer has been deleted.'), 'success');
+        refreshPage();
+      } catch (error) {
+        Swal.fire(('Error!'), ('There was an error deleting your answer.'), 'error');
+      }
+    }
+  };
+
+  const handleTrashClickForResponse = async (questionId, parentAnswerId, responseId) => {
+    const result = await Swal.fire({
+      title: ('Are you sure?'),
+      text: ("You won't be able to revert this!"),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: ('Yes, delete it!'),
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(
+          `http://localhost:8083/api/questions/${questionId}/answers/${parentAnswerId}/responses/${responseId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        Swal.fire(('Deleted!'), ('The reply has been deleted.'), 'success');
+        refreshPage();
+      } catch (error) {
+        Swal.fire(('Error!'), ('There was an error deleting your reply.'), 'error');
+      }
+    }
+  };
   return (
     <>
       <NewNavbar />
@@ -744,6 +827,15 @@ function QuestionsPageById() {
                                           onClick={() => handleAcceptAnswer(answer.id)}
                                         />
                                       )}
+                                       {isModerator && (
+                                        <div style={{ marginTop: '10px' }}>
+                                          <FontAwesomeIcon
+                                            icon={faTrashAlt}
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => handleTrashClick(question.id, answer.id)}
+                                          />
+                                        </div>
+                                      )}
                                     </Cader>
                                    
                                     <span>
@@ -852,6 +944,21 @@ function QuestionsPageById() {
                                                 <p style={{ margin: '5px 0', color: '#666' }}>
                                                   {response.content}
                                                 </p>
+                                                {isModerator && (
+                                                  <div style={{ marginTop: '10px' }}>
+                                                    <FontAwesomeIcon
+                                                      icon={faTrashAlt}
+                                                      style={{ cursor: 'pointer' }}
+                                                      onClick={() =>
+                                                        handleTrashClickForResponse(
+                                                          question.id,
+                                                          answer.id,
+                                                          response.id,
+                                                        )
+                                                      }
+                                                    />
+                                                  </div>
+                                                )}
                                               </div>
                                             </Comment>
                                           ))}
